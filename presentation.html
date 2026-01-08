@@ -1,0 +1,2934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Trends Engine - System Design</title>
+    
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css">
+    
+    <!-- Mermaid.js for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <style>
+        /* Custom styling for consistent look */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+        }
+        
+        .reveal {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .reveal h1 {
+            color: var(--primary-color);
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 0.15em;
+            text-transform: none;
+        }
+        
+        .reveal h2 {
+            color: var(--secondary-color);
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 0.2em;
+            text-transform: none;
+        }
+        
+        .reveal h3 {
+            color: var(--primary-color);
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 0.15em;
+            text-transform: none;
+        }
+        
+        .reveal p, .reveal li {
+            font-size: 0.65em;
+            line-height: 1.3;
+            color: var(--text-color);
+            text-align: left;
+            margin: 0 0 0.4em 0;
+        }
+        
+        .reveal ul {
+            display: block;
+            margin-left: 0;
+        }
+        
+        .reveal li {
+            margin-bottom: 0.4em;
+        }
+        
+        .reveal .slides section {
+            text-align: left;
+            padding: 10px 30px;
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        
+        .reveal .slides {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .slide-number {
+            font-size: 0.8em;
+            color: #999;
+        }
+        
+        /* Title slide styling */
+        .title-slide {
+            text-align: center !important;
+        }
+        
+        .title-slide h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.3em;
+        }
+        
+        .title-slide p {
+            font-size: 1.1em;
+            color: #666;
+            text-align: center;
+        }
+        
+        /* Content box styling */
+        .content-box {
+            background: var(--light-bg);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .goal-box {
+            background: #e8f4f8;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        /* Use case styling */
+        .use-case {
+            margin-bottom: 0.5em;
+        }
+        
+        .use-case-title {
+            color: var(--secondary-color);
+            font-weight: 600;
+            font-size: 0.7em;
+            margin-bottom: 0.1em;
+        }
+        
+        .use-case-description {
+            color: var(--text-color);
+            font-size: 0.65em;
+            margin-left: 1em;
+            line-height: 1.25;
+        }
+        
+        /* Constraint styling */
+        .constraint-item {
+            padding: 6px 10px;
+            margin: 5px 0;
+            background: var(--light-bg);
+            border-radius: 5px;
+            border-left: 3px solid var(--secondary-color);
+        }
+        
+        .constraint-item p {
+            margin: 0;
+            font-size: 0.65em;
+            line-height: 1.25;
+        }
+        
+        /* Footer */
+        .slide-footer {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 0.7em;
+            color: #999;
+        }
+        
+        /* Highlight important text */
+        .highlight {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        /* Navigation hint */
+        .nav-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 0.8em;
+            color: #999;
+            opacity: 0.7;
+        }
+        
+        /* Persona styling */
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 6px;
+        }
+        
+        .persona-card {
+            background: var(--light-bg);
+            padding: 6px 8px;
+            border-radius: 6px;
+            border-top: 3px solid var(--secondary-color);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .persona-card h3 {
+            color: var(--secondary-color);
+            font-size: 0.62em;
+            margin-bottom: 0.2em;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .persona-icon {
+            font-size: 0.9em;
+        }
+        
+        .persona-card .label {
+            color: #666;
+            font-weight: 600;
+            font-size: 0.48em;
+            margin-top: 0.3em;
+            margin-bottom: 0.05em;
+        }
+        
+        .persona-card .value {
+            color: var(--text-color);
+            font-size: 0.48em;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .persona-quote {
+            font-style: italic;
+            color: #555;
+            font-size: 0.48em;
+            margin-top: 0.3em;
+            padding: 4px;
+            background: #fff;
+            border-radius: 3px;
+            border-left: 2px solid var(--accent-color);
+        }
+        
+        .metric-highlight {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+        
+        /* Journey-based personas */
+        .journey-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .journey-card {
+            background: var(--light-bg);
+            padding: 8px;
+            border-radius: 6px;
+            border-top: 3px solid var(--secondary-color);
+            text-align: center;
+            position: relative;
+        }
+        
+        .journey-card:nth-child(1) { border-top-color: #95a5a6; }
+        .journey-card:nth-child(2) { border-top-color: #3498db; }
+        .journey-card:nth-child(3) { border-top-color: #e67e22; }
+        .journey-card:nth-child(4) { border-top-color: #e74c3c; }
+        
+        .journey-level {
+            font-size: 0.52em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.2em;
+        }
+        
+        .journey-title {
+            color: var(--primary-color);
+            font-size: 0.62em;
+            font-weight: 700;
+            margin-bottom: 0.2em;
+        }
+        
+        .journey-icon {
+            font-size: 1.4em;
+            margin: 0.1em 0;
+        }
+        
+        .journey-card .label {
+            color: #666;
+            font-weight: 600;
+            font-size: 0.48em;
+            margin-top: 0.3em;
+            margin-bottom: 0.1em;
+        }
+        
+        .journey-card .value {
+            color: var(--text-color);
+            font-size: 0.48em;
+            margin: 0 0 0.3em 0;
+            line-height: 1.2;
+        }
+        
+        .journey-card ul {
+            text-align: left;
+            padding-left: 12px;
+            margin: 0.3em 0;
+        }
+        
+        .journey-card li {
+            font-size: 0.48em;
+            margin-bottom: 0.2em;
+        }
+        
+        .journey-investment {
+            font-size: 0.5em;
+            color: #666;
+            font-weight: 600;
+            margin-top: 0.3em;
+            padding-top: 0.3em;
+            border-top: 1px solid #ddd;
+        }
+        
+        .journey-arrow {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1em;
+            color: var(--secondary-color);
+        }
+        
+        /* Case study styling */
+        .case-study-header {
+            background: linear-gradient(135deg, var(--secondary-color), #5dade2);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-bottom: 3px;
+        }
+        
+        .case-study-header h2 {
+            color: white;
+            font-size: 0.5em;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .case-study-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+        
+        .meta-item {
+            background: var(--light-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.38em;
+            text-align: center;
+        }
+        
+        .meta-item strong {
+            display: block;
+            color: var(--secondary-color);
+            font-size: 0.95em;
+            margin-bottom: 1px;
+        }
+        
+        .case-section {
+            background: var(--light-bg);
+            padding: 3px 5px;
+            border-radius: 3px;
+            margin-bottom: 3px;
+            border-left: 2px solid var(--secondary-color);
+        }
+        
+        .case-section h3 {
+            font-size: 0.44em;
+            margin: 0 0 0.1em 0;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .case-section ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .case-section li {
+            font-size: 0.39em;
+            margin-bottom: 0.1em;
+            line-height: 1.15;
+        }
+        
+        .case-section p {
+            font-size: 0.39em;
+            margin: 0 0 0.1em 0;
+            line-height: 1.15;
+        }
+        
+        .case-campaign {
+            background: #e8f4f8;
+            border-left-color: var(--accent-color);
+        }
+        
+        .case-takeaway {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            text-align: center;
+            margin-top: 3px;
+            padding: 2px 5px;
+        }
+        
+        .case-takeaway p {
+            font-size: 0.4em;
+            font-weight: 600;
+            color: #856404;
+            margin: 0;
+        }
+        
+        .case-icon {
+            font-size: 0.85em;
+        }
+        
+        /* Architecture diagram styling */
+        .arch-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .arch-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        
+        .arch-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .arch-column-header {
+            font-size: 0.52em;
+            font-weight: 700;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+            text-align: center;
+        }
+        
+        .arch-box {
+            background: var(--light-bg);
+            padding: 5px 8px;
+            border-radius: 5px;
+            border-left: 3px solid var(--secondary-color);
+            font-size: 0.48em;
+            text-align: center;
+            position: relative;
+        }
+        
+        .arch-box.ingestion { border-left-color: #3498db; }
+        .arch-box.processing { border-left-color: #e67e22; }
+        .arch-box.ui { border-left-color: #27ae60; }
+        
+        .arch-box-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+        }
+        
+        .arch-box-items {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.3;
+        }
+        
+        .arch-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: var(--secondary-color);
+            flex: 0 0 20px;
+        }
+        
+        .arch-principles {
+            background: #e8f4f8;
+            padding: 6px 10px;
+            border-radius: 5px;
+            border-left: 4px solid var(--secondary-color);
+            margin-top: 6px;
+        }
+        
+        .arch-principles-title {
+            font-size: 0.52em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 3px;
+        }
+        
+        .arch-principles-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3px;
+            font-size: 0.45em;
+            line-height: 1.3;
+        }
+        
+        .arch-metric-bar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 6px 0;
+        }
+        
+        .arch-metric {
+            background: var(--light-bg);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.46em;
+            text-align: center;
+            border-top: 3px solid var(--accent-color);
+        }
+        
+        .arch-integration-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin: 6px 0;
+        }
+        
+        /* Mermaid diagram styling */
+        .mermaid-container {
+            background: white;
+            padding: 5px;
+            border-radius: 8px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 450px;
+        }
+        
+        .mermaid {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        
+        .mermaid .node rect,
+        .mermaid .node circle,
+        .mermaid .node polygon {
+            stroke-width: 2px;
+        }
+        
+        .mermaid text {
+            font-size: 16px !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        }
+        
+        .mermaid .cluster text {
+            font-size: 18px !important;
+            font-weight: 600 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Slide 1: Problem Statement -->
+            <section>
+                <h1>Problem Statement</h1>
+                
+                <div class="content-box">
+                    <p>
+                        This challenge is to <span class="highlight">design a system that crawls the web</span> 
+                        to identify the latest social media and marketing trends. This system, aimed at 
+                        enhancing Mailchimp services, provides valuable insights to marketers by gathering 
+                        and analyzing data across various digital platforms.
+                    </p>
+                </div>
+                
+                <div class="goal-box">
+                    <h3>Goal</h3>
+                    <p>
+                        Design a <span class="highlight">marketing trends engine for Mailchimp</span> that 
+                        crawls websites, social media platforms, and online forums to identify current and 
+                        emerging trends in marketing and social media. The goal is to provide Mailchimp users 
+                        (marketers and businesses) with insights that can influence their 
+                        <span class="highlight">marketing strategies, content creation, and email campaigns</span>.
+                    </p>
+                </div>
+            </section>
+            
+            <!-- Slide 2: Requirements Clarification Questions -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">Requirements Clarification Questions</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>Before designing, we need to clarify ambiguous requirements.</strong> 
+                    These questions help us understand priorities, constraints, and make informed architectural decisions.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Functional Requirements -->
+                    <div style="background: #e3f2fd; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #1565c0; margin-bottom: 1px;">🎯 Functional Requirements</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Q: What is the expected latency for trend detection?</strong><br/>
+                            → Drives choice between real-time streaming vs. batch processing. Real-time (minutes) requires Kafka/Flink. Batch (hours) allows simpler ETL.<br/><br/>
+                            <strong>Q: Should we prioritize precision or recall in trend identification?</strong><br/>
+                            → High precision (fewer false positives) = stricter filters. High recall (catch all trends) = more liberal detection.<br/><br/>
+                            <strong>Q: What types of trends are most valuable? (topics, hashtags, behavioral patterns, sentiment shifts)</strong><br/>
+                            → Determines NLP pipeline complexity. Topics = keyword extraction. Behavior = user action analysis.<br/><br/>
+                            <strong>Q: Do we need to support historical trend analysis or only current trends?</strong><br/>
+                            → Historical = larger storage (TimescaleDB), more compute for backtesting. Current only = simpler architecture.
+                        </div>
+                    </div>
+                    
+                    <!-- Scale & Performance -->
+                    <div style="background: #e8f5e9; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #2e7d32; margin-bottom: 1px;">📊 Scale & Performance</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Q: How many sources should we crawl? (thousands vs. millions)</strong><br/>
+                            → Affects crawler architecture. <10K = simple cron jobs. >1M = distributed crawler fleet with coordination.<br/><br/>
+                            <strong>Q: What's the expected query load? (QPS from Mailchimp users)</strong><br/>
+                            → 100 QPS = single API server. 10K QPS = load balancer + auto-scaling + CDN.<br/><br/>
+                            <strong>Q: What are the peak traffic patterns? (10x spikes during viral events?)</strong><br/>
+                            → Determines over-provisioning strategy, auto-scaling policies, caching requirements.<br/><br/>
+                            <strong>Q: How fresh should trend data be? (real-time, hourly, daily)</strong><br/>
+                            → Real-time = WebSockets + streaming. Hourly = batch + polling. Daily = overnight jobs.
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Cost & Resource Constraints -->
+                    <div style="background: #fff3e0; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #e65100; margin-bottom: 1px;">💰 Cost & Resource Constraints</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Q: What's the infrastructure budget? ($10K/month vs. $100K/month)</strong><br/>
+                            → Low budget = batch processing, minimal redundancy, simpler ML. High budget = real-time, multi-region, GPU inference.<br/><br/>
+                            <strong>Q: Are there team constraints? (existing expertise, operational capacity)</strong><br/>
+                            → Managed services (RDS, Kinesis) vs. self-managed (Kafka, Cassandra). Affects technology choices.<br/><br/>
+                            <strong>Q: What's the acceptable trade-off between accuracy and cost?</strong><br/>
+                            → 99% accuracy with expensive GPUs vs. 85% accuracy with cheap CPU inference.<br/><br/>
+                            <strong>Q: Do we need multi-region deployment or single-region sufficient?</strong><br/>
+                            → Multi-region = 3x cost but better latency/availability. Single region = simpler but higher latency for global users.
+                        </div>
+                    </div>
+                    
+                    <!-- Data & Privacy -->
+                    <div style="background: #f3e5f5; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #6a1b9a; margin-bottom: 1px;">🔒 Data & Privacy</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Q: What data retention policy? (30 days, 1 year, indefinite)</strong><br/>
+                            → Affects storage costs. 30 days = ~1TB. 1 year = ~15TB. Indefinite = continuous growth.<br/><br/>
+                            <strong>Q: Do we need to respect robots.txt and rate limits strictly?</strong><br/>
+                            → Ethical crawling = slower, more polite. Aggressive = faster but risk of IP bans.<br/><br/>
+                            <strong>Q: Are there compliance requirements? (GDPR, CCPA, user data handling)</strong><br/>
+                            → GDPR = user consent, right to deletion, data portability. Affects architecture (audit logs, data isolation).<br/><br/>
+                            <strong>Q: Should we support custom/private sources? (user-provided content, authenticated APIs)</strong><br/>
+                            → Requires OAuth integration, secure credential storage, per-user crawling logic.
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #ffebee; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #e74c3c; margin-top: 3px;">
+                    <div style="font-size: 0.34em; font-weight: 700; color: #c62828; margin-bottom: 1px;">🎯 Assumptions for This Design</div>
+                    <div style="font-size: 0.3em; color: #333; line-height: 1.1;">
+                        <strong>Latency:</strong> Hourly for most trends, real-time for breaking news | 
+                        <strong>Scale:</strong> 1.8M sources, 10M posts/day, 100K Mailchimp users | 
+                        <strong>Budget:</strong> ~$15K/month infrastructure | 
+                        <strong>Accuracy:</strong> 85-90% precision (some false positives acceptable) | 
+                        <strong>Privacy:</strong> Public data only, GDPR compliant | 
+                        <strong>Freshness:</strong> Hybrid approach (real-time for top sources, batch for long-tail)
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 3: Use Cases -->
+            <section>
+                <h1>Use Cases</h1>
+                
+                <div class="use-case">
+                    <div class="use-case-title">1. Trend Identification and Analysis</div>
+                    <div class="use-case-description">
+                        The service crawls various web sources to identify and categorize new marketing trends.
+                    </div>
+                </div>
+                
+                <div class="use-case">
+                    <div class="use-case-title">2. Aggregation of Marketing Data</div>
+                    <div class="use-case-description">
+                        Collates data points into meaningful insights, considering the relevance and 
+                        popularity of the identified trends.
+                    </div>
+                </div>
+                
+                <div class="use-case">
+                    <div class="use-case-title">3. Presentation of Trends</div>
+                    <div class="use-case-description">
+                        Delivers an easy-to-understand interface for marketers to explore current trends, 
+                        including visualizations and summaries.
+                    </div>
+                </div>
+                
+                <div class="use-case">
+                    <div class="use-case-title">4. Integration with Mailchimp Services</div>
+                    <div class="use-case-description">
+                        Seamlessly feeds insights into Mailchimp, enabling users to apply trends in their 
+                        email marketing campaigns directly.
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 3: Constraints and Assumptions -->
+            <section>
+                <h1>Constraints and Assumptions</h1>
+                
+                <div class="constraint-item">
+                    <p>
+                        <strong>Traffic Distribution:</strong> Traffic to popular trend topics is very high, 
+                        while niche subjects see considerably less activity.
+                    </p>
+                </div>
+                
+                <div class="constraint-item">
+                    <p>
+                        <strong>Processing Requirements:</strong> The system must process vast amounts of 
+                        web content efficiently, maintaining data freshness.
+                    </p>
+                </div>
+                
+                <div class="constraint-item">
+                    <p>
+                        <strong>Real-time Updates:</strong> Users expect near-real-time updates on 
+                        trending subjects.
+                    </p>
+                </div>
+                
+                <div class="constraint-item">
+                    <p>
+                        <strong>User Interaction:</strong> Assumes no direct user interaction with the 
+                        crawling engine; users interact with a user-friendly dashboard or API integrated 
+                        into Mailchimp's existing platform.
+                    </p>
+                </div>
+            </section>
+            
+            <!-- Slide 4: Scale Estimates & Back-of-Envelope Calculations -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">Scale Estimates & Capacity Planning</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>Understanding system scale drives architectural decisions.</strong> 
+                    Estimating data volumes, storage needs, compute requirements, and network bandwidth to design for production scale.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Traffic & Data Volume -->
+                    <div style="background: #e3f2fd; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #1565c0; margin-bottom: 1px;">📊 Traffic & Data Volume Estimates</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Sources to Crawl:</strong> 1M websites, 500K Twitter accounts, 200K Instagram profiles, 100K YouTube channels = ~1.8M sources total<br/>
+                            <strong>Crawl Frequency:</strong> High-priority (hourly) = 50K sources. Medium (4x/day) = 300K. Low (daily) = 1.45M<br/>
+                            <strong>Content Generated:</strong> ~10M new posts/articles per day across all sources<br/>
+                            <strong>Raw Data Ingestion:</strong> 10M posts × 2KB avg = 20GB/day = 600GB/month = 7.2TB/year<br/>
+                            <strong>After Processing:</strong> Structured data ~30% of raw = 6GB/day = 2.2TB/year<br/>
+                            <strong>User Traffic:</strong> 100K active Mailchimp users. 10% daily active = 10K DAU. 20 API calls per session = 200K requests/day = ~2.3 QPS avg, ~25 QPS peak
+                        </div>
+                    </div>
+                    
+                    <!-- Storage Requirements -->
+                    <div style="background: #e8f5e9; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #2e7d32; margin-bottom: 1px;">💾 Storage Requirements</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Raw Content (S3):</strong> 7.2TB/year × 2 years retention = 14.4TB<br/>
+                            <strong>Processed Data (PostgreSQL):</strong> Trends table (10M rows/year × 1KB) = 10GB/year. Keywords (50M rows × 200B) = 10GB/year. Total: ~40GB with indexes<br/>
+                            <strong>Time-Series (TimescaleDB):</strong> Trend scores (1M trends × 24 points/day × 50B) = 1.2GB/day = 438GB/year<br/>
+                            <strong>Document Store (MongoDB):</strong> Enriched content (5M docs/year × 5KB) = 25GB/year<br/>
+                            <strong>Search Index (Elasticsearch):</strong> Full-text index ~2x source data = 50GB/year<br/>
+                            <strong>Cache (Redis):</strong> Hot data (top 10K trends × 100KB) = 1GB in-memory<br/>
+                            <strong>Total Storage (Year 1):</strong> ~15TB (mostly raw content in S3)
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Compute & Network -->
+                    <div style="background: #fff3e0; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #e65100; margin-bottom: 1px;">⚙️ Compute Requirements</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Crawlers:</strong> 1.8M sources/day ÷ 86400 sec = 21 pages/sec. Assuming 2 sec/page = 42 concurrent crawlers. With overhead: 100 crawler instances (t3.medium: 2 vCPU, 4GB RAM)<br/>
+                            <strong>Processing Workers:</strong> 10M posts/day ÷ 86400 = 116 posts/sec. NLP processing ~1 sec/post = 120 workers (c5.xlarge: 4 vCPU, 8GB RAM)<br/>
+                            <strong>ML Inference:</strong> Trend scoring 10K/sec peak. Model inference 10ms/prediction = 100 concurrent requests. 20 GPU instances (g4dn.xlarge) for real-time scoring<br/>
+                            <strong>API Layer:</strong> 25 QPS peak × 100ms avg latency = 2.5 concurrent requests. With headroom: 10 API servers (c5.large: 2 vCPU, 4GB RAM)<br/>
+                            <strong>Databases:</strong> PostgreSQL (r5.xlarge), MongoDB (r5.large), Redis (r5.large), Elasticsearch (3-node cluster: r5.xlarge each)
+                        </div>
+                    </div>
+                    
+                    <!-- Network & Cost -->
+                    <div style="background: #f3e5f5; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #6a1b9a; margin-bottom: 1px;">🌐 Network & Cost Estimates</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Outbound Crawling:</strong> 20GB/day download = 600GB/month = $54/month (AWS data transfer)<br/>
+                            <strong>Inter-Service:</strong> Kafka (10GB/day × 30 × $0.01) = $3/month. Internal APIs negligible (same AZ)<br/>
+                            <strong>CDN/API Egress:</strong> API responses (200K req/day × 50KB) = 10GB/day = 300GB/month = $27/month<br/>
+                            <strong>Approximate Monthly Cost Breakdown:</strong><br/>
+                            • Compute (EC2/ECS): $8,000 (crawlers + workers + API)<br/>
+                            • Storage (S3 + EBS): $500 (mostly S3 at $0.023/GB)<br/>
+                            • Databases (RDS/managed): $2,000 (PostgreSQL + managed services)<br/>
+                            • ML Infrastructure (GPUs): $3,000 (g4dn instances)<br/>
+                            • Network: $100<br/>
+                            • Monitoring/Logging: $300<br/>
+                            <strong>Total: ~$14K/month = $168K/year (production scale)</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #ffebee; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #e74c3c; margin-top: 3px;">
+                    <div style="font-size: 0.34em; font-weight: 700; color: #c62828; margin-bottom: 1px;">🎯 Key Capacity Planning Insights</div>
+                    <div style="font-size: 0.3em; color: #333; line-height: 1.1;">
+                        <strong>Bottleneck:</strong> NLP processing (CPU-bound) | 
+                        <strong>Scale Strategy:</strong> Horizontal scaling of workers via Kubernetes | 
+                        <strong>Cost Driver:</strong> ML GPU instances (22% of total cost) | 
+                        <strong>Storage Growth:</strong> ~15TB/year (plan for 50TB capacity Year 3) | 
+                        <strong>Peak Traffic:</strong> 10x average during trend spikes - must handle 250 QPS
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 5: Case Study 1 - Behavioral Trend -->
+            <section style="padding: 6px 30px;">
+                <h1 style="font-size: 0.95em; margin-bottom: 0.08em;">Case Study 1: Behavioral Trend → Rapid Campaign</h1>
+                
+                <div class="case-study-header">
+                    <h2>🏢 DTC Apparel Brand: From Trend Detection to Market Leadership</h2>
+                </div>
+                
+                <div class="case-study-meta">
+                    <div class="meta-item">
+                        <strong>📊 Source</strong>
+                        Google Trends
+                    </div>
+                    <div class="meta-item">
+                        <strong>🏷️ Trend Type</strong>
+                        Behavioral Shift
+                    </div>
+                    <div class="meta-item">
+                        <strong>⏱️ Response Time</strong>
+                        1-2 weeks
+                    </div>
+                </div>
+                
+                <div class="case-section">
+                    <h3><span class="case-icon">🔍</span> Trend Detected</h3>
+                    <ul>
+                        <li>Rising search interest: <strong>"comfortable work clothes"</strong>, <strong>"WFH outfits"</strong>, <strong>"loungewear"</strong></li>
+                        <li>Sustained growth over multiple weeks (not a spike)</li>
+                        <li>Strong geo-correlation with urban areas</li>
+                        <li>High purchase intent signals (search patterns indicate buying mode)</li>
+                    </ul>
+                </div>
+                
+                <div class="case-section">
+                    <h3><span class="case-icon">📊</span> Trend Characteristics</h3>
+                    <ul>
+                        <li><strong>Behavior-driven:</strong> Real shift in consumer lifestyle (not temporary)</li>
+                        <li><strong>Clear purchase intent:</strong> Not just browsing, actively searching for solutions</li>
+                        <li><strong>Cross-category relevance:</strong> Fashion + lifestyle + work culture convergence</li>
+                    </ul>
+                </div>
+                
+                <div class="case-section">
+                    <h3><span class="case-icon">💡</span> Insight Extracted</h3>
+                    <p><strong>Consumer need identified:</strong> Clothing that balances comfort and professionalism for home-based work environments.</p>
+                    <ul>
+                        <li>Spending more time at home (new normal)</li>
+                        <li>Need for work-appropriate yet comfortable attire</li>
+                        <li>Actively seeking solutions (high intent to purchase)</li>
+                    </ul>
+                </div>
+                
+                <div class="case-section case-campaign">
+                    <h3><span class="case-icon">📧</span> Campaign Execution: "Comfort You Can Work In"</h3>
+                    <ul>
+                        <li><strong>Launch timeline:</strong> 1-2 weeks after trend validation</li>
+                        <li><strong>Creative approach:</strong> Full campaign refresh (not just copy tweaks)</li>
+                        <li><strong>Messaging:</strong> Positioned comfort as a professional advantage, not compromise</li>
+                        <li><strong>Competitive edge:</strong> First-to-market with targeted messaging</li>
+                    </ul>
+                </div>
+                
+                <div class="case-takeaway">
+                    <p>✅ <strong>Key Takeaway:</strong> Fast-moving behavioral trends require rapid response. System enables detection, validation, and action in days, not months.</p>
+                </div>
+            </section>
+            
+            <!-- Slide 5: Case Study 2 - Seasonal Planning -->
+            <section style="padding: 6px 30px;">
+                <h1 style="font-size: 0.95em; margin-bottom: 0.08em;">Case Study 2: Seasonal Trend → Strategic Planning</h1>
+                
+                <div class="case-study-header">
+                    <h2>🏡 Home Décor Brand: Early Detection Drives Pre-Season Success</h2>
+                </div>
+                
+                <div class="case-study-meta">
+                    <div class="meta-item">
+                        <strong>📌 Source</strong>
+                        Pinterest Trends
+                    </div>
+                    <div class="meta-item">
+                        <strong>🏷️ Trend Type</strong>
+                        Seasonal Planning
+                    </div>
+                    <div class="meta-item">
+                        <strong>⏱️ Lead Time</strong>
+                        3 months ahead
+                    </div>
+                </div>
+                
+                <div class="case-section">
+                    <h3><span class="case-icon">🔍</span> Trend Detected</h3>
+                    <ul>
+                        <li>Early growth in searches: <strong>"outdoor living spaces"</strong>, <strong>"small patio ideas"</strong></li>
+                        <li>Detected <strong>3 months before spring</strong> (traditional outdoor season)</li>
+                        <li>Strong historical seasonality pattern (predictable cycle)</li>
+                        <li>Year-over-year growth indicates accelerating interest</li>
+                    </ul>
+                </div>
+                
+                <div class="case-section">
+                    <h3><span class="case-icon">📊</span> Trend Characteristics</h3>
+                    <ul>
+                        <li><strong>Planning-phase trend:</strong> Users researching and collecting ideas</li>
+                        <li><strong>Seasonal predictability:</strong> Historical data confirms pattern</li>
+                        <li><strong>Inspiration-seeking:</strong> Not immediate purchase intent (yet)</li>
+                    </ul>
+                </div>
+                
+                <div class="case-section">
+                    <h3><span class="case-icon">💡</span> Insight Extracted</h3>
+                    <p><strong>Consumer behavior identified:</strong> Pinterest users plan outdoor upgrades months in advance, seeking inspiration before purchase.</p>
+                    <ul>
+                        <li>Planning outdoor upgrades earlier than previous years</li>
+                        <li>Looking for inspiration and ideas (not ready to buy yet)</li>
+                        <li>Opportunity to capture audience during research phase</li>
+                    </ul>
+                </div>
+                
+                <div class="case-section case-campaign">
+                    <h3><span class="case-icon">📧</span> Campaign Execution: Pre-Season Inspiration Series</h3>
+                    <ul>
+                        <li><strong>Campaign type:</strong> Educational email series (not direct sales)</li>
+                        <li><strong>Content strategy:</strong> "How-to" guides, mood boards, space-planning tips</li>
+                        <li><strong>Timing advantage:</strong> Engaged audience before competitors' spring campaigns</li>
+                        <li><strong>Nurture approach:</strong> Built trust during planning phase, converted during buying phase</li>
+                        <li><strong>Result:</strong> Captured early planners, built email engagement, positioned as thought leader</li>
+                    </ul>
+                </div>
+                
+                <div class="case-takeaway">
+                    <p>✅ <strong>Key Takeaway:</strong> Seasonal trends with early signals enable strategic planning. System identifies planning-phase behavior, allowing brands to engage before purchase intent peaks.</p>
+                </div>
+            </section>
+            
+            <!-- Slide 6: System Design Trade-offs & Decisions -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">Key Trade-offs & Design Decisions</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>Every system design involves critical trade-offs.</strong> 
+                    Understanding the implications of each decision and choosing based on business priorities and constraints.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Freshness vs Cost -->
+                    <div style="background: #e3f2fd; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #1565c0; margin-bottom: 1px;">⚖️ Freshness vs. Cost</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Real-Time Processing (Streaming):</strong><br/>
+                            ✅ Pros: Trends detected within minutes. Competitive advantage for breaking news. Better user engagement.<br/>
+                            ❌ Cons: Higher compute cost (always-on Kafka/Flink). Complex infrastructure. More expensive (~3x cost).<br/><br/>
+                            <strong>Batch Processing (Hourly/Daily):</strong><br/>
+                            ✅ Pros: Lower cost (scheduled jobs). Simpler architecture. Easier debugging. Can use spot instances.<br/>
+                            ❌ Cons: Delayed insights (1-24 hours). May miss viral trends. Less competitive.<br/><br/>
+                            <strong>🎯 Our Choice: Hybrid Approach</strong><br/>
+                            Real-time for high-priority sources (Twitter verified, major news). Batch for long-tail content. Balances cost and freshness.
+                        </div>
+                    </div>
+                    
+                    <!-- Breadth vs Depth -->
+                    <div style="background: #e8f5e9; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #2e7d32; margin-bottom: 1px;">⚖️ Breadth vs. Depth</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Wide Coverage (Many Sources, Shallow):</strong><br/>
+                            ✅ Pros: Discover diverse trends. Better for discovery. Cover niche markets.<br/>
+                            ❌ Cons: More noise. Lower quality signals. Higher crawling costs. Harder to validate.<br/><br/>
+                            <strong>Deep Analysis (Fewer Sources, Detailed):</strong><br/>
+                            ✅ Pros: Higher quality insights. Better context. More accurate scoring. Easier to validate.<br/>
+                            ❌ Cons: May miss emerging trends. Bias toward known sources. Limited diversity.<br/><br/>
+                            <strong>🎯 Our Choice: Tiered Approach</strong><br/>
+                            Deep analysis for top 10K authoritative sources (hourly + full content). Light crawling for 1.8M long-tail (daily + headlines only). Quality + coverage.
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Accuracy vs Speed -->
+                    <div style="background: #fff3e0; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #e65100; margin-bottom: 1px;">⚖️ Accuracy vs. Speed</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Complex ML Models (High Accuracy):</strong><br/>
+                            ✅ Pros: Better trend detection (95%+ precision). Nuanced understanding. Fewer false positives.<br/>
+                            ❌ Cons: Slow inference (500ms+). Expensive GPU compute. Complex to maintain. Longer training cycles.<br/><br/>
+                            <strong>Simple Heuristics (High Speed):</strong><br/>
+                            ✅ Pros: Fast (<10ms). Cheap CPU compute. Easy to understand. Quick iterations.<br/>
+                            ❌ Cons: Lower accuracy (70-80%). More false positives. Misses subtle trends.<br/><br/>
+                            <strong>🎯 Our Choice: Multi-Stage Pipeline</strong><br/>
+                            Stage 1: Fast filters (keyword matching, basic stats) - 10ms. Stage 2: Lightweight ML (BERT base) - 50ms. Stage 3: Deep models for top candidates - 500ms. 90% accuracy with 50ms P99 latency.
+                        </div>
+                    </div>
+                    
+                    <!-- Consistency vs Availability (CAP) -->
+                    <div style="background: #f3e5f5; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #6a1b9a; margin-bottom: 1px;">⚖️ Consistency vs. Availability (CAP Theorem)</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Strong Consistency (CP System):</strong><br/>
+                            ✅ Pros: All users see same trends. No stale data. Easier reasoning. Better for billing/critical data.<br/>
+                            ❌ Cons: Lower availability during network partitions. Higher latency (coordination overhead). Single point of failure risk.<br/><br/>
+                            <strong>High Availability (AP System):</strong><br/>
+                            ✅ Pros: Always available. Better user experience. Geographically distributed. Handles failures gracefully.<br/>
+                            ❌ Cons: Eventual consistency (temporary inconsistencies). Users may see different trends briefly. Conflict resolution needed.<br/><br/>
+                            <strong>🎯 Our Choice: Different guarantees by component</strong><br/>
+                            Trend data: AP (eventual consistency acceptable). User customizations: CP (PostgreSQL with sync replication). Cache: Best effort (TTL-based). Acceptable for most users to see slightly stale trends.
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #ffebee; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #e74c3c; margin-top: 3px;">
+                    <div style="font-size: 0.34em; font-weight: 700; color: #c62828; margin-bottom: 1px;">🎯 Key Trade-off Principles</div>
+                    <div style="font-size: 0.3em; color: #333; line-height: 1.1;">
+                        <strong>No Perfect Solution:</strong> Every choice has costs - optimize for business value | 
+                        <strong>Start Simple:</strong> Begin with batch processing, add streaming as needed | 
+                        <strong>Measure Everything:</strong> Data-driven trade-off decisions (A/B test architectures) | 
+                        <strong>Be Pragmatic:</strong> 80% solution at 20% cost often wins | 
+                        <strong>Design for Change:</strong> Modular architecture allows swapping components
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 7: Role-Based Personas -->
+            <section>
+                <h1>End Users & Personas (Role-Based)</h1>
+                
+                <div class="personas-grid">
+                    <!-- Persona 1: Solo Marketer -->
+                    <div class="persona-card">
+                        <h3><span class="persona-icon">👩‍💼</span> Sarah</h3>
+                        <div class="label">Role</div>
+                        <div class="value">Small Business Owner / Solo Marketer</div>
+                        
+                        <div class="label">Company</div>
+                        <div class="value">E-commerce store (5 employees)</div>
+                        
+                        <div class="label">Pain Point</div>
+                        <div class="value">"I need to stay relevant but don't have time to research trends daily"</div>
+                        
+                        <div class="label">Goal</div>
+                        <div class="value">Quick trend insights for weekly email campaigns</div>
+                        
+                        <div class="label">Usage</div>
+                        <div class="value">Dashboard widget, subject line assistant</div>
+                        
+                        <div class="label">Impact</div>
+                        <div class="value">Time: 30 min → 10 min/week<br>Open rate: <span class="metric-highlight">+44%</span></div>
+                    </div>
+                    
+                    <!-- Persona 2: Email Marketing Manager -->
+                    <div class="persona-card">
+                        <h3><span class="persona-icon">👨‍💼</span> Marcus</h3>
+                        <div class="label">Role</div>
+                        <div class="value">Email Marketing Manager</div>
+                        
+                        <div class="label">Company</div>
+                        <div class="value">SaaS Startup (50 employees)</div>
+                        
+                        <div class="label">Pain Point</div>
+                        <div class="value">"Our campaigns feel stale; open rates are declining"</div>
+                        
+                        <div class="label">Goal</div>
+                        <div class="value">Data-driven content that resonates with current trends</div>
+                        
+                        <div class="label">Usage</div>
+                        <div class="value">Deep trend analysis, campaign editor integration, A/B testing</div>
+                        
+                        <div class="label">Impact</div>
+                        <div class="value">Campaigns: 8 → 12/month<br>Relevance: <span class="metric-highlight">+35%</span></div>
+                    </div>
+                    
+                    <!-- Persona 3: Agency Strategist -->
+                    <div class="persona-card">
+                        <h3><span class="persona-icon">👩‍💼</span> Priya</h3>
+                        <div class="label">Role</div>
+                        <div class="value">Marketing Agency Strategist</div>
+                        
+                        <div class="label">Company</div>
+                        <div class="value">Agency (15+ client accounts)</div>
+                        
+                        <div class="label">Pain Point</div>
+                        <div class="value">"Each client needs industry-specific trends; can't manually track everything"</div>
+                        
+                        <div class="label">Goal</div>
+                        <div class="value">Customized trend tracking per client with automated alerts</div>
+                        
+                        <div class="label">Usage</div>
+                        <div class="value">Custom keywords, multi-tenant views, API integration</div>
+                        
+                        <div class="label">Impact</div>
+                        <div class="value">Research: 10h → 2h/week<br>Retention: <span class="metric-highlight">+20%</span></div>
+                    </div>
+                </div>
+                
+                <div class="persona-quote" style="margin-top: 6px; text-align: center;">
+                    💡 <strong>Target Market:</strong> 60% Solo Marketers (SMB) | 30% Growing Companies | 10% Agencies/Enterprise
+                </div>
+            </section>
+            
+            <!-- Slide 7: Journey-Based Personas -->
+            <section>
+                <h1>User Journey & Maturity Levels</h1>
+                
+                <div class="journey-grid">
+                    <!-- Level 1 -->
+                    <div class="journey-card">
+                        <div class="journey-level">Level 1</div>
+                        <div class="journey-title">Trend Browser</div>
+                        <div class="journey-icon">🔍</div>
+                        
+                        <div class="label">Objective</div>
+                        <div class="value">Just wants to see what's trending</div>
+                        
+                        <div class="label">Uses</div>
+                        <ul>
+                            <li>Dashboard view</li>
+                            <li>Pre-built insights</li>
+                            <li>Trending topics feed</li>
+                        </ul>
+                        
+                        <div class="journey-investment">⏱️ 10 min/week</div>
+                        <div class="journey-arrow">→</div>
+                    </div>
+                    
+                    <!-- Level 2 -->
+                    <div class="journey-card">
+                        <div class="journey-level">Level 2</div>
+                        <div class="journey-title">Strategic Implementer</div>
+                        <div class="journey-icon">📊</div>
+                        
+                        <div class="label">Objective</div>
+                        <div class="value">Applies trends to campaigns</div>
+                        
+                        <div class="label">Uses</div>
+                        <ul>
+                            <li>Campaign integration</li>
+                            <li>Content suggestions</li>
+                            <li>Export reports</li>
+                        </ul>
+                        
+                        <div class="journey-investment">⏱️ 1-2 hours/week</div>
+                        <div class="journey-arrow">→</div>
+                    </div>
+                    
+                    <!-- Level 3 -->
+                    <div class="journey-card">
+                        <div class="journey-level">Level 3</div>
+                        <div class="journey-title">Trend Hunter</div>
+                        <div class="journey-icon">🎯</div>
+                        
+                        <div class="label">Objective</div>
+                        <div class="value">Custom tracking for niche topics</div>
+                        
+                        <div class="label">Uses</div>
+                        <ul>
+                            <li>Custom keywords</li>
+                            <li>Source additions</li>
+                            <li>Smart alerts</li>
+                        </ul>
+                        
+                        <div class="journey-investment">⏱️ 3-4 hours/week</div>
+                        <div class="journey-arrow">→</div>
+                    </div>
+                    
+                    <!-- Level 4 -->
+                    <div class="journey-card">
+                        <div class="journey-level">Level 4</div>
+                        <div class="journey-title">Power User</div>
+                        <div class="journey-icon">🚀</div>
+                        
+                        <div class="label">Objective</div>
+                        <div class="value">API integration & automation</div>
+                        
+                        <div class="label">Uses</div>
+                        <ul>
+                            <li>REST/GraphQL APIs</li>
+                            <li>WebSocket feeds</li>
+                            <li>Bulk exports</li>
+                        </ul>
+                        
+                        <div class="journey-investment">⏱️ Continuous automated</div>
+                    </div>
+                </div>
+                
+                <div class="content-box" style="margin-top: 8px;">
+                    <p style="text-align: center;">
+                        <strong>Design Principle:</strong> System accommodates all maturity levels, allowing users to 
+                        <span class="highlight">progress naturally</span> from casual browsing to advanced automation 
+                        without switching platforms.
+                    </p>
+                </div>
+            </section>
+            
+            <!-- Slide 8: Ingestion Pipeline Architecture -->
+            <section style="padding: 4px 20px;">
+                <h1 style="font-size: 0.9em; margin-bottom: 0.05em;">Data Ingestion Pipeline (Modular)</h1>
+                
+                <div class="mermaid-container" style="min-height: 380px;">
+                    <div class="mermaid">
+                        graph LR
+                            subgraph Sources["📊 SOURCES"]
+                                A1[Twitter/Reddit<br/>LinkedIn]
+                                A2[Blogs/Forums<br/>News Sites]
+                                A3[Custom RSS<br/>User Sources]
+                            end
+                            
+                            subgraph Collectors["🕷️ COLLECTORS"]
+                                B1[API Crawler<br/>Scrapy]
+                                B2[RSS Parser<br/>Feed Reader]
+                                B3[Web Scraper<br/>Playwright]
+                            end
+                            
+                            subgraph Queue["📨 QUEUE & PROCESS"]
+                                C1[Kafka<br/>12 Partitions]
+                                C2[Rate Limiter<br/>Redis]
+                                C3[Deduplication<br/>Bloom Filter]
+                            end
+                            
+                            subgraph Storage["💾 STORAGE"]
+                                D1[MongoDB<br/>Raw Text/JSON]
+                                D2[S3<br/>Videos/Images]
+                            end
+                            
+                            subgraph Media["🎬 MEDIA PROCESSING"]
+                                E1[Video Download<br/>TikTok/Reels]
+                                E2[Image Download<br/>Instagram/Pinterest]
+                            end
+                            
+                            A1 --> B1
+                            A2 --> B2
+                            A3 --> B3
+                            
+                            B1 --> C1
+                            B2 --> C1
+                            B3 --> C1
+                            
+                            C1 --> C2
+                            C2 --> C3
+                            
+                            C3 --> D1
+                            C3 --> E1
+                            C3 --> E2
+                            
+                            E1 --> D2
+                            E2 --> D2
+                            
+                            style A1 fill:#3498db,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style A2 fill:#3498db,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style A3 fill:#3498db,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style B1 fill:#5dade2,stroke:#2c3e50,stroke-width:2px
+                            style B2 fill:#5dade2,stroke:#2c3e50,stroke-width:2px
+                            style B3 fill:#5dade2,stroke:#2c3e50,stroke-width:2px
+                            style C1 fill:#e67e22,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style C2 fill:#f39c12,stroke:#2c3e50,stroke-width:2px
+                            style C3 fill:#f39c12,stroke:#2c3e50,stroke-width:2px
+                            style D1 fill:#9b59b6,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style D2 fill:#9b59b6,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style E1 fill:#27ae60,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style E2 fill:#27ae60,stroke:#2c3e50,stroke-width:2px,color:#fff
+                    </div>
+                </div>
+                
+                <div class="arch-metric-bar">
+                    <div class="arch-metric">
+                        <strong>Capacity</strong><br>500K items/day
+                    </div>
+                    <div class="arch-metric">
+                        <strong>Sources</strong><br>50+ integrated
+                    </div>
+                    <div class="arch-metric">
+                        <strong>Media</strong><br>Videos + Images
+                    </div>
+                    <div class="arch-metric">
+                        <strong>Dedup Rate</strong><br>99%+ accuracy
+                    </div>
+                </div>
+                
+                <div class="arch-principles">
+                    <div class="arch-principles-title">🎯 KEY PRINCIPLES</div>
+                    <div class="arch-principles-list">
+                        <div>✅ Independent crawler modules (scale separately)</div>
+                        <div>✅ Multimodal processing (text, video, images)</div>
+                        <div>✅ S3 storage for media assets (videos, images)</div>
+                        <div>✅ Rate limiting & politeness (robots.txt compliant)</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 9: Insight Generation Pipeline -->
+            <section style="padding: 4px 20px;">
+                <h1 style="font-size: 0.9em; margin-bottom: 0.05em;">Insight Generation Pipeline (Modular)</h1>
+                
+                <div class="mermaid-container" style="min-height: 380px;">
+                    <div class="mermaid">
+                        graph LR
+                            subgraph Input["📥 INPUT"]
+                                A1[MongoDB<br/>Raw Content]
+                                A2[Kafka<br/>Stream]
+                            end
+                            
+                            subgraph NLP["🤖 NLP PROCESSING"]
+                                B1[Text Cleaning<br/>HTML Strip]
+                                B2[Entity Extract<br/>spaCy NER]
+                                B3[Sentiment<br/>BERT Model]
+                                B4[Keywords<br/>TF-IDF]
+                            end
+                            
+                            subgraph Analysis["📈 ANALYSIS"]
+                                C1[Trend<br/>Detection]
+                                C2[Scoring<br/>6 Metrics]
+                                C3[Custom<br/>Matcher]
+                                C4[AI Insights<br/>GPT-4]
+                            end
+                            
+                            subgraph Output["💾 OUTPUT"]
+                                D1[PostgreSQL<br/>Trends + RLS]
+                                D2[Elasticsearch<br/>Search Index]
+                                D3[Redis<br/>Cache]
+                            end
+                            
+                            A1 --> B1
+                            A2 --> B1
+                            
+                            B1 --> B2
+                            B1 --> B3
+                            B1 --> B4
+                            
+                            B2 --> C1
+                            B3 --> C1
+                            B4 --> C1
+                            
+                            C1 --> C2
+                            C2 --> C3
+                            C3 --> C4
+                            
+                            C4 --> D1
+                            C4 --> D2
+                            C4 --> D3
+                            
+                            style A1 fill:#3498db,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style A2 fill:#3498db,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style B1 fill:#e67e22,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style B2 fill:#f39c12,stroke:#2c3e50,stroke-width:2px
+                            style B3 fill:#f39c12,stroke:#2c3e50,stroke-width:2px
+                            style B4 fill:#f39c12,stroke:#2c3e50,stroke-width:2px
+                            style C1 fill:#e74c3c,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style C2 fill:#c0392b,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style C3 fill:#c0392b,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style C4 fill:#c0392b,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style D1 fill:#9b59b6,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style D2 fill:#8e44ad,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style D3 fill:#8e44ad,stroke:#2c3e50,stroke-width:2px,color:#fff
+                    </div>
+                </div>
+                
+                <div class="arch-metric-bar">
+                    <div class="arch-metric">
+                        <strong>Scoring</strong><br>6 metrics combined
+                    </div>
+                    <div class="arch-metric">
+                        <strong>Update Freq</strong><br>Every 10 minutes
+                    </div>
+                    <div class="arch-metric">
+                        <strong>NLP Speed</strong><br>&lt; 2s per item
+                    </div>
+                    <div class="arch-metric">
+                        <strong>Accuracy</strong><br>85%+ categorization
+                    </div>
+                </div>
+                
+                <div class="arch-principles">
+                    <div class="arch-principles-title">🎯 KEY PRINCIPLES</div>
+                    <div class="arch-principles-list">
+                        <div>✅ Parallel NLP modules (independent processing)</div>
+                        <div>✅ Multi-dimensional scoring (popularity, velocity, engagement)</div>
+                        <div>✅ Custom keyword matching (user-defined tracking)</div>
+                        <div>✅ AI-powered insights (actionable recommendations)</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 10: User Interface & Integration -->
+            <section style="padding: 15px 40px;">
+                <h1 style="font-size: 1.2em; margin-bottom: 0.2em;">User Interface & Integration</h1>
+                
+                <div style="text-align: center; margin: 15px 0; background: white; padding: 15px; border-radius: 8px;">
+                    <div class="mermaid">
+                        graph LR
+                            A[Data Layer<br/>PostgreSQL, Redis]
+                            B[API Layer<br/>REST, GraphQL]
+                            C[UI Layer<br/>Dashboard, Mailchimp]
+                            
+                            A --> B
+                            B --> C
+                            
+                            style A fill:#3498db,stroke:#2c3e50,stroke-width:3px,color:#fff
+                            style B fill:#27ae60,stroke:#2c3e50,stroke-width:3px,color:#fff
+                            style C fill:#e67e22,stroke:#2c3e50,stroke-width:3px,color:#fff
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center; border-top: 4px solid #e74c3c;">
+                            <div style="font-size: 0.7em; font-weight: 700; margin-bottom: 5px; color: #2c3e50;">API Latency</div>
+                            <div style="font-size: 0.65em; color: #333;">&lt; 200ms</div>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center; border-top: 4px solid #e74c3c;">
+                            <div style="font-size: 0.7em; font-weight: 700; margin-bottom: 5px; color: #2c3e50;">CDN Cache</div>
+                            <div style="font-size: 0.65em; color: #333;">80% hit rate</div>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center; border-top: 4px solid #e74c3c;">
+                            <div style="font-size: 0.7em; font-weight: 700; margin-bottom: 5px; color: #2c3e50;">WebSocket</div>
+                            <div style="font-size: 0.65em; color: #333;">Real-time</div>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center; border-top: 4px solid #e74c3c;">
+                            <div style="font-size: 0.7em; font-weight: 700; margin-bottom: 5px; color: #2c3e50;">Uptime SLA</div>
+                            <div style="font-size: 0.65em; color: #333;">99.5%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #e8f4f8; padding: 12px 20px; border-radius: 8px; border-left: 5px solid #3498db; margin-top: 20px;">
+                    <div style="font-size: 0.7em; font-weight: 700; color: #2c3e50; margin-bottom: 8px;">🎯 KEY PRINCIPLES</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 0.6em; line-height: 1.5; color: #333;">
+                        <div>✅ Multi-protocol APIs</div>
+                        <div>✅ Seamless Mailchimp integration</div>
+                        <div>✅ Real-time WebSocket updates</div>
+                        <div>✅ Multi-device support</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 11: Crawler Architecture -->
+            <section style="padding: 6px 25px;">
+                <h1 style="font-size: 0.95em; margin-bottom: 0.05em;">Crawler Architecture & Multi-Tenant URL Management</h1>
+                
+                <div style="text-align: center; margin: 5px 0; background: white; padding: 5px; border-radius: 6px;">
+                    <div class="mermaid" style="transform: scale(0.55); transform-origin: top center;">
+                        graph LR
+                            A[Global URLs<br/>PostgreSQL]
+                            A2[Custom<br/>Per Tenant]
+                            B{Router}
+                            C[High<br/>5min]
+                            D[Med<br/>15min]
+                            E[Low<br/>1hr]
+                            F[Crawlers<br/>10x]
+                            G[Crawlers<br/>5x]
+                            H[Crawlers<br/>2x]
+                            I[Rate<br/>Limiter]
+                            J[Raw Content<br/>MongoDB]
+                            K[Processing<br/>Pipeline]
+                            L[PostgreSQL<br/>Trends]
+                            
+                            A --> B
+                            A2 --> B
+                            B --> C
+                            B --> D
+                            B --> E
+                            C --> F
+                            D --> G
+                            E --> H
+                            F --> I
+                            G --> I
+                            H --> I
+                            I --> J
+                            J --> K
+                            K --> L
+                            
+                            style A fill:#3498db,stroke:#2c3e50,stroke-width:3px,color:#fff
+                            style A2 fill:#e74c3c,stroke:#2c3e50,stroke-width:3px,color:#fff
+                            style B fill:#e67e22,stroke:#2c3e50,stroke-width:3px,color:#fff
+                            style C fill:#e74c3c,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style D fill:#f39c12,stroke:#2c3e50,stroke-width:2px
+                            style E fill:#95a5a6,stroke:#2c3e50,stroke-width:2px
+                            style F fill:#27ae60,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style G fill:#27ae60,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style H fill:#27ae60,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style I fill:#9b59b6,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style J fill:#34495e,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style K fill:#e67e22,stroke:#2c3e50,stroke-width:2px,color:#fff
+                            style L fill:#3498db,stroke:#2c3e50,stroke-width:2px,color:#fff
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0;">
+                    <div style="background: #e3f2fd; padding: 5px 8px; border-radius: 4px; border-left: 3px solid #3498db;">
+                        <div style="font-size: 0.5em; font-weight: 700; color: #2c3e50; margin-bottom: 2px;">🌐 Global Sources</div>
+                        <div style="font-size: 0.42em; color: #333; line-height: 1.2;">
+                            • Twitter trending, Reddit hot<br/>
+                            • Shared across all tenants
+                        </div>
+                    </div>
+                    <div style="background: #ffebee; padding: 5px 8px; border-radius: 4px; border-left: 3px solid #e74c3c;">
+                        <div style="font-size: 0.5em; font-weight: 700; color: #c0392b; margin-bottom: 2px;">🔒 Custom Sources</div>
+                        <div style="font-size: 0.42em; color: #333; line-height: 1.2;">
+                            • User Twitter hashtags, RSS<br/>
+                            • Isolated per tenant
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin: 6px 0;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                        <div style="background: #ffebee; padding: 4px 6px; border-radius: 4px; border-left: 3px solid #e74c3c;">
+                            <div style="font-size: 0.46em; font-weight: 700; color: #c0392b; margin-bottom: 1px;">🔴 HIGH</div>
+                            <div style="font-size: 0.4em; color: #333; line-height: 1.2;">Every 5 min<br/>10 instances</div>
+                        </div>
+                        <div style="background: #fff3e0; padding: 4px 6px; border-radius: 4px; border-left: 3px solid #f39c12;">
+                            <div style="font-size: 0.46em; font-weight: 700; color: #e67e22; margin-bottom: 1px;">🟡 MEDIUM</div>
+                            <div style="font-size: 0.4em; color: #333; line-height: 1.2;">Every 15 min<br/>5 instances</div>
+                        </div>
+                        <div style="background: #eceff1; padding: 4px 6px; border-radius: 4px; border-left: 3px solid #95a5a6;">
+                            <div style="font-size: 0.46em; font-weight: 700; color: #7f8c8d; margin-bottom: 1px;">⚪ LOW</div>
+                            <div style="font-size: 0.4em; color: #333; line-height: 1.2;">Every 1 hour<br/>2 instances</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #e8f4f8; padding: 5px 8px; border-radius: 4px; border-left: 3px solid #34495e; margin: 6px 0;">
+                    <div style="font-size: 0.5em; font-weight: 700; color: #2c3e50; margin-bottom: 2px;">💾 Storage Flow</div>
+                    <div style="font-size: 0.42em; color: #333; line-height: 1.2;">
+                        <strong>MongoDB (Raw):</strong> Temporary storage of crawled HTML/JSON + tenant_id → 
+                        <strong>Processing Pipeline:</strong> NLP, extraction → 
+                        <strong>PostgreSQL:</strong> Structured trends (permanent)
+                    </div>
+                </div>
+                
+                <div style="background: #fff3cd; padding: 5px 8px; border-radius: 4px; border-left: 3px solid #ffc107; margin-top: 6px;">
+                    <div style="font-size: 0.48em; font-weight: 700; color: #856404; margin-bottom: 1px;">🎯 Multi-Tenant Isolation</div>
+                    <div style="font-size: 0.42em; color: #333; line-height: 1.2;">
+                        Custom sources per tenant. Content tagged with tenant_id. Global sources shared, custom sources private.
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 12: NLP Extraction Pipeline -->
+            <section>
+                <h1 style="font-size: 1.4em; margin-bottom: 4px;">Multimodal Extraction Pipeline</h1>
+                
+                <p style="font-size: 0.45em; color: #555; margin: 0 0 6px 0; line-height: 1.2; text-align: center;">
+                    <strong>Transforms text, video, and image content into structured trends.</strong> 
+                    Processes 1M+ items daily (text + multimedia). Video transcription (Whisper AI), image OCR (Gemini). 
+                    Extracts entities, analyzes sentiment, discovers topics, and aggregates into scored trends.
+                </p>
+                
+                <div style="display: flex; justify-content: center; margin: 6px 0;">
+                    <div class="mermaid" style="transform: scale(0.65); transform-origin: top center;">
+                        graph LR
+                            A[Raw Content<br/>MongoDB + S3] --> B1[Text Processing<br/>HTML Strip]
+                            A --> B2[Video Processing<br/>Whisper AI]
+                            A --> B3[Image Processing<br/>Gemini OCR]
+                            
+                            B1 --> C[NER<br/>Entities]
+                            B2 --> C
+                            B3 --> C
+                            
+                            C --> D[Sentiment<br/>Analysis]
+                            D --> E[Topics<br/>Keywords]
+                            E --> F[Trend Agg<br/>Scoring]
+                            F --> G[PostgreSQL<br/>Final Storage]
+                            
+                            style A fill:#e3f2fd,stroke:#2196F3,stroke-width:2px
+                            style B1 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+                            style B2 fill:#d1c4e9,stroke:#673ab7,stroke-width:2px
+                            style B3 fill:#c8e6c9,stroke:#4caf50,stroke-width:2px
+                            style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+                            style D fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+                            style E fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+                            style F fill:#fff9c4,stroke:#ffc107,stroke-width:2px
+                            style G fill:#e0f2f1,stroke:#009688,stroke-width:2px
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #2c3e50; margin: 6px 0;">
+                    <div style="font-size: 0.42em; font-weight: 700; color: #2c3e50; margin-bottom: 2px;">📋 Pipeline Details</div>
+                    <div style="font-size: 0.38em; color: #333; line-height: 1.25;">
+                        <strong>• Multimodal Processing:</strong> Text (HTML/JSON) processed directly. Videos transcribed via Whisper AI (speech-to-text). Images processed via Gemini OCR (text extraction). All extracted text flows into unified NLP pipeline.<br/>
+                        <strong>• Video Processing:</strong> TikTok, Instagram Reels, YouTube Shorts downloaded to S3. Whisper AI extracts transcripts + captions. Audio analysis for trending sounds. Visual metadata (objects, scenes) stored as JSONB. Processing: ~5min per video.<br/>
+                        <strong>• Image Processing:</strong> Instagram posts, Pinterest pins, Twitter images. Gemini extracts text from infographics, memes, screenshots. Color/style analysis for visual trends. CLIP embeddings for semantic search. Processing: ~10sec per image.<br/>
+                        <strong>• Storage Strategy:</strong> MongoDB for text/JSON. S3 for videos (30-day retention). S3 for images (90-day retention). PostgreSQL for extracted text + metadata. Transcripts/OCR text treated as standard content in trends pipeline.
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 13: Insight Generation & Scoring -->
+            <section>
+                <h1 style="font-size: 1.3em; margin-bottom: 4px;">Insight Generation & Quality Scoring</h1>
+                
+                <p style="font-size: 0.45em; color: #555; margin: 0 0 6px 0; line-height: 1.2; text-align: center;">
+                    <strong>Ensures only high-quality, reliable trends reach users.</strong> 
+                    Filters spam/bots (10-15% removal rate), weights by source reliability (3-tier system), 
+                    calculates 6-metric momentum scores, and matches custom keywords per tenant with complete isolation.
+                </p>
+                
+                <div style="display: flex; justify-content: center; margin: 6px 0;">
+                    <div class="mermaid" style="transform: scale(0.7); transform-origin: top center;">
+                        graph LR
+                            A[NLP Output] --> B[Quality Filter<br/>Spam Check]
+                            B --> C[Source Score<br/>Reliability]
+                            C --> D[Momentum Score<br/>6 Metrics]
+                            D --> E[Tenant Match<br/>Custom Keywords]
+                            E --> F[PostgreSQL<br/>+ Cache]
+                            
+                            style A fill:#e3f2fd,stroke:#2196F3,stroke-width:2px
+                            style B fill:#ffebee,stroke:#e74c3c,stroke-width:2px
+                            style C fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+                            style D fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+                            style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+                            style F fill:#e0f2f1,stroke:#009688,stroke-width:2px
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #2c3e50; margin: 6px 0;">
+                    <div style="font-size: 0.42em; font-weight: 700; color: #2c3e50; margin-bottom: 2px;">📋 Scoring & Quality Details</div>
+                    <div style="font-size: 0.38em; color: #333; line-height: 1.25;">
+                        <strong>• 6-Metric Momentum Score (0-100):</strong> Volume 25% (weighted by source reliability), Growth 25% (7-day velocity via regression), Engagement 20% (likes/shares/comments), Source Diversity 15% (prevents single-source bias), Recency 10% (exponential time decay), Sentiment 5% (positive sentiment boost).<br/>
+                        <strong>• Source Reliability (3-Tier):</strong> Tier 1 (1.0x weight): NYTimes, WSJ, verified accounts. Tier 2 (0.7x): Industry blogs, established forums. Tier 3 (0.4x): New/unverified sources. Scores adjust dynamically based on spam ratio and quality history.<br/>
+                        <strong>• Multi-Tenant Custom Keywords:</strong> Stored in tenant_keywords table with RLS. Matched in parallel (16 workers) after global scoring. Supports exact/phrase/broad/regex patterns with include/exclude rules. Results stored in custom_trends table (isolated per tenant).<br/>
+                        <strong>• Quality Guarantees:</strong> Spam filtered via ML model (94% accuracy, >0.7 threshold). Bot detection via posting frequency + IP patterns. 98%+ deduplication via MinHash + LSH. Outlier removal via z-score (>3 filtered).
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 14: User Interface & Integration -->
+            <section>
+                <h1 style="font-size: 1.3em; margin-bottom: 4px;">User Interface & Integration Layer</h1>
+                
+                <p style="font-size: 0.45em; color: #555; margin: 0 0 6px 0; line-height: 1.2; text-align: center;">
+                    <strong>Multi-region deployment ensures global availability and low latency.</strong> 
+                    Aggressive caching strategies deliver sub-200ms responses. Natural language search provides intuitive discovery. 
+                    Customizable dashboards adapt to user workflows. Intelligent cache eviction keeps data fresh.
+                </p>
+                
+                <div style="display: flex; justify-content: center; margin: 6px 0;">
+                    <div class="mermaid" style="transform: scale(0.7); transform-origin: top center;">
+                        graph LR
+                            A[User Request] --> B[Regional CDN<br/>CloudFront]
+                            B --> C[API Gateway<br/>Regional]
+                            C --> D[Cache Layer<br/>Redis Cluster]
+                            D --> E[Application<br/>Multi-AZ]
+                            E --> F[Data Layer<br/>Read Replicas]
+                            
+                            style A fill:#e3f2fd,stroke:#2196F3,stroke-width:2px
+                            style B fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+                            style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+                            style D fill:#ffebee,stroke:#e74c3c,stroke-width:2px
+                            style E fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+                            style F fill:#e0f2f1,stroke:#009688,stroke-width:2px
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #2c3e50; margin: 6px 0;">
+                    <div style="font-size: 0.42em; font-weight: 700; color: #2c3e50; margin-bottom: 2px;">📋 UI & Integration Details</div>
+                    <div style="font-size: 0.38em; color: #333; line-height: 1.25;">
+                        <strong>• Multi-Region Deployment:</strong> 3 active regions (US-East, US-West, EU-West) with automatic failover. Regional CDN (CloudFront) routes users to nearest edge location. Regional API Gateways reduce cross-region latency. Database read replicas in each region. Target: <100ms latency for 95% of users globally.<br/>
+                        <strong>• Caching Strategy (5-Layer):</strong> CDN caches static assets (24h TTL). Redis caches API responses (trending: 5min, search: 15min, dashboards: 30min). Application cache for user sessions. Database query cache. Elasticsearch caches aggregations. 80%+ cache hit rate. Sub-200ms p95 response time.<br/>
+                        <strong>• Natural Language Search:</strong> Powered by Elasticsearch + semantic embeddings. Users query in plain English: "show me AI marketing trends from last week". NLP parses intent (filters, date range, category). Semantic search finds related terms automatically. Fuzzy matching for typos. Ranked results by relevance + recency.<br/>
+                        <strong>• Dashboards & Customization:</strong> Drag-and-drop dashboard builder. Save custom views per user. Widget library (trend charts, heatmaps, tables, alerts). Export to PDF/CSV. API webhooks for integrations. Mailchimp campaign editor integration. Mobile-responsive design.<br/>
+                        <strong>• Cache Eviction Strategy:</strong> Event-driven invalidation on trend updates. Stale-while-revalidate pattern (serve cached, refresh async). LRU eviction for memory limits. TTL-based expiration per data type. Cache warming for popular queries. Distributed cache invalidation via Redis Pub/Sub across regions.
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 15: Scale & Capacity Planning -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">Scale & Capacity Planning (500 Clients)</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>Back-of-the-envelope calculations for production scale with multimodal processing.</strong> 
+                    Supporting 500 SMB clients. 1M items/day (700K text + 200K videos + 100K images). 
+                    Estimates include Whisper AI video transcription, Gemini image OCR, 100K trends/day detection, 50K API requests/hour.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <div style="background: #e3f2fd; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #1565c0; margin-bottom: 1px;">📊 Data Ingestion & Storage</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Daily Crawl Volume:</strong><br/>
+                            • Text: 700K pages (global + custom sources)<br/>
+                            • Videos: 200K (TikTok, Reels, YouTube Shorts)<br/>
+                            • Images: 100K (Instagram, Pinterest, Twitter)<br/>
+                            • Total: 1M items/day<br/>
+                            <strong>S3 Storage (Media):</strong><br/>
+                            • Videos: 200K × 10MB avg = 2TB/day<br/>
+                            • 30-day retention: 2TB × 30 = 60TB<br/>
+                            • Images: 100K × 500KB avg = 50GB/day<br/>
+                            • 90-day retention: 50GB × 90 = 4.5TB<br/>
+                            <strong>MongoDB (Text/JSON):</strong> 700K × 200KB = 140GB/day, 30-day = 4.2TB<br/>
+                            <strong>PostgreSQL (Trends):</strong> 100K trends × 5KB = 500MB/day, 2-year = 365GB<br/>
+                            <strong>Total Storage: ~70TB (64.5TB S3 media + 4.2TB MongoDB + 365GB PostgreSQL + replicas)</strong>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #e8f5e9; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #2e7d32; margin-bottom: 1px;">💻 Compute Requirements</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Crawling Fleet:</strong><br/>
+                            • Text: 700K/day = 8 pages/sec → 3 instances (HA: 5)<br/>
+                            • Video Download: 200K/day = 2.3 videos/sec → 2 instances (HA: 4)<br/>
+                            • Image Download: 100K/day = 1.2 images/sec → 1 instance (HA: 2)<br/>
+                            • Instance: 4 vCPU, 8GB RAM<br/>
+                            <strong>Multimodal Processing:</strong><br/>
+                            • Text NLP: 700K docs ÷ 1440min = 486 docs/min → 1 worker (HA: 3)<br/>
+                            • Video (Whisper AI): 200K × 5min = 1M min/day ÷ 1440 = 694 parallel → 10 GPU instances (g4dn.xlarge)<br/>
+                            • Image (Gemini API): 100K × 10sec = 278 hours/day ÷ 24 = 12 parallel → API calls (no instances)<br/>
+                            <strong>API Layer:</strong> Peak 50K req/hour = 14 req/sec → 3 instances (4 vCPU, 8GB each)
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <div style="background: #fff3e0; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #e65100; margin-bottom: 1px;">🗄️ Database Sizing</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>PostgreSQL Cluster:</strong><br/>
+                            • Primary: 16 vCPU, 64GB RAM, 500GB SSD<br/>
+                            • Read Replicas: 3 × (8 vCPU, 32GB RAM, 500GB SSD)<br/>
+                            • Connection pool: 500 max connections<br/>
+                            <strong>MongoDB Cluster:</strong><br/>
+                            • 3-node replica set<br/>
+                            • Each: 8 vCPU, 32GB RAM, 2TB SSD<br/>
+                            • Total: 6TB raw storage (3 replicas)<br/>
+                            <strong>Redis Cluster:</strong><br/>
+                            • 3-node cluster (sharded)<br/>
+                            • Each: 4 vCPU, 16GB RAM<br/>
+                            • Total memory: 48GB cache capacity<br/>
+                            <strong>Elasticsearch:</strong><br/>
+                            • 3-node cluster, Each: 8 vCPU, 32GB RAM, 1TB SSD
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f3e5f5; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #6a1b9a; margin-bottom: 1px;">💰 Monthly Cost Estimate (AWS)</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Compute (EC2/ECS):</strong><br/>
+                            • Crawlers: 11 instances (text+video+image) = $1,600<br/>
+                            • NLP Workers: 3 × c5.2xlarge = $880<br/>
+                            • Video Processing: 10 × g4dn.xlarge (GPU) = $5,200<br/>
+                            • API Servers: 3 × c5.xlarge = $440<br/>
+                            • Other Services: ~$500<br/>
+                            • Subtotal: $8,620/month<br/>
+                            <strong>Databases:</strong> (same as before) $4,100/month<br/>
+                            <strong>Storage & AI APIs:</strong><br/>
+                            • S3 Storage (70TB): $1,600/month<br/>
+                            • Gemini API (100K images/day): $600/month<br/>
+                            • Data transfer: $1,200/month<br/>
+                            • CloudFront CDN: $300/month<br/>
+                            <strong>Total: ~$16,420/month (~$197K/year)</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #ffebee; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #e74c3c; margin-top: 3px;">
+                    <div style="font-size: 0.34em; font-weight: 700; color: #c62828; margin-bottom: 1px;">📈 Per-Client Metrics</div>
+                    <div style="font-size: 0.3em; color: #333; line-height: 1.1;">
+                        <strong>Cost per client:</strong> $16,420 ÷ 500 = $32.84/month | 
+                        <strong>Storage per client:</strong> 70TB ÷ 500 = 140GB (mostly videos) | 
+                        <strong>Video processing:</strong> 200K ÷ 500 = 400 videos/day/client | 
+                        <strong>API capacity:</strong> 100 req/hour/client | 
+                        <strong>Scaling:</strong> Add 1 GPU instance per 20K additional videos/day
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 16: Database Schema Design -->
+            <section>
+                <h1 style="font-size: 1.05em; margin-bottom: 2px;">Database Schema & Entity Model</h1>
+                
+                <p style="font-size: 0.34em; color: #555; margin: 0 0 2px 0; line-height: 1.1; text-align: center;">
+                    <strong>Multi-tenant PostgreSQL schema with detailed table definitions, indexes, and relationships.</strong> 
+                    Supporting 100K users, 10M trends, with sub-200ms query performance through strategic indexing and partitioning.
+                </p>
+                
+                <!-- Core Tables Section -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin: 2px 0;">
+                    <!-- Tenants Table -->
+                    <div style="background: #e3f2fd; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #1565c0; margin-bottom: 0.5px;">📋 tenants</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.1; font-family: 'Courier New', monospace;">
+                            <strong>id</strong> UUID PK<br/>
+                            <strong>name</strong> VARCHAR(255) NOT NULL<br/>
+                            <strong>email</strong> VARCHAR(255) UNIQUE<br/>
+                            <strong>plan_tier</strong> ENUM('free','pro','enterprise')<br/>
+                            <strong>api_key_hash</strong> VARCHAR(64)<br/>
+                            <strong>settings</strong> JSONB DEFAULT '{}'<br/>
+                            <strong>created_at</strong> TIMESTAMPTZ<br/>
+                            <strong>updated_at</strong> TIMESTAMPTZ<br/>
+                            <br/>
+                            <strong style="color: #e65100;">Indexes:</strong><br/>
+                            • PK: id<br/>
+                            • UNIQUE: email<br/>
+                            • api_key_hash (B-tree)
+                        </div>
+                    </div>
+                    
+                    <!-- Global Trends Table -->
+                    <div style="background: #e8f5e9; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #2e7d32; margin-bottom: 0.5px;">🌍 global_trends</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.1; font-family: 'Courier New', monospace;">
+                            <strong>id</strong> UUID PK<br/>
+                            <strong>title</strong> VARCHAR(500) NOT NULL<br/>
+                            <strong>category</strong> VARCHAR(100)<br/>
+                            <strong>keywords</strong> TEXT[] NOT NULL<br/>
+                            <strong>momentum_score</strong> DECIMAL(5,2)<br/>
+                            <strong>total_mentions</strong> INTEGER<br/>
+                            <strong>detected_at</strong> TIMESTAMPTZ<br/>
+                            <strong>peak_at</strong> TIMESTAMPTZ<br/>
+                            <strong>sentiment_score</strong> DECIMAL(3,2)<br/>
+                            <strong>statistics</strong> JSONB<br/>
+                            <strong>metadata</strong> JSONB<br/>
+                            <br/>
+                            <strong style="color: #e65100;">Indexes:</strong><br/>
+                            • PK: id<br/>
+                            • (momentum_score DESC, detected_at DESC)<br/>
+                            • (category, momentum_score DESC)<br/>
+                            • GIN: keywords<br/>
+                            • GIN: statistics<br/>
+                            <br/>
+                            <strong style="color: #9c27b0;">Partitioning:</strong><br/>
+                            • RANGE on detected_at (yearly)
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Trends Table -->
+                    <div style="background: #ffebee; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #e74c3c;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #c62828; margin-bottom: 0.5px;">🔒 custom_trends</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.1; font-family: 'Courier New', monospace;">
+                            <strong>id</strong> UUID PK<br/>
+                            <strong>tenant_id</strong> UUID FK → tenants(id)<br/>
+                            <strong>title</strong> VARCHAR(500) NOT NULL<br/>
+                            <strong>keywords</strong> TEXT[] NOT NULL<br/>
+                            <strong>momentum_score</strong> DECIMAL(5,2)<br/>
+                            <strong>total_mentions</strong> INTEGER<br/>
+                            <strong>detected_at</strong> TIMESTAMPTZ<br/>
+                            <strong>source_urls</strong> TEXT[]<br/>
+                            <strong>statistics</strong> JSONB<br/>
+                            <br/>
+                            <strong style="color: #e65100;">Indexes:</strong><br/>
+                            • PK: id<br/>
+                            • (tenant_id, momentum_score DESC)<br/>
+                            • (tenant_id, detected_at DESC)<br/>
+                            • GIN: keywords<br/>
+                            <br/>
+                            <strong style="color: #9c27b0;">RLS Policy:</strong><br/>
+                            • WHERE tenant_id = current_tenant_id()<br/>
+                            • Enforced at PostgreSQL level
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Supporting Tables Section -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin: 2px 0;">
+                    <!-- Tenant Keywords Table -->
+                    <div style="background: #f3e5f5; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #6a1b9a; margin-bottom: 0.5px;">🔑 tenant_keywords</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.1; font-family: 'Courier New', monospace;">
+                            <strong>id</strong> UUID PK<br/>
+                            <strong>tenant_id</strong> UUID FK → tenants(id)<br/>
+                            <strong>keyword</strong> VARCHAR(200) NOT NULL<br/>
+                            <strong>match_type</strong> ENUM('exact','phrase','broad','regex')<br/>
+                            <strong>priority</strong> INTEGER DEFAULT 1<br/>
+                            <strong>is_active</strong> BOOLEAN DEFAULT TRUE<br/>
+                            <strong>created_at</strong> TIMESTAMPTZ<br/>
+                            <br/>
+                            <strong style="color: #e65100;">Indexes:</strong><br/>
+                            • PK: id<br/>
+                            • (tenant_id, is_active, priority DESC)<br/>
+                            • (keyword) GIN for text search<br/>
+                            <br/>
+                            <strong style="color: #9c27b0;">Constraints:</strong><br/>
+                            • UNIQUE(tenant_id, keyword, match_type)
+                        </div>
+                    </div>
+                    
+                    <!-- Trend Time Series Table -->
+                    <div style="background: #fff3e0; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #e65100; margin-bottom: 0.5px;">📊 trend_time_series</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.1; font-family: 'Courier New', monospace;">
+                            <strong>trend_id</strong> UUID FK → global_trends(id)<br/>
+                            <strong>timestamp</strong> TIMESTAMPTZ NOT NULL<br/>
+                            <strong>mentions_count</strong> INTEGER<br/>
+                            <strong>momentum_score</strong> DECIMAL(5,2)<br/>
+                            <strong>sentiment_score</strong> DECIMAL(3,2)<br/>
+                            <strong>engagement_rate</strong> DECIMAL(5,4)<br/>
+                            <br/>
+                            <strong style="color: #e65100;">Indexes:</strong><br/>
+                            • PK: (trend_id, timestamp)<br/>
+                            • (timestamp DESC) for range queries<br/>
+                            <br/>
+                            <strong style="color: #9c27b0;">Hypertable:</strong><br/>
+                            • TimescaleDB extension<br/>
+                            • Chunk interval: 7 days<br/>
+                            • Compression after 30 days<br/>
+                            • Retention: 2 years
+                        </div>
+                    </div>
+                    
+                    <!-- Sources Table -->
+                    <div style="background: #e0f2f1; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #009688;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #00695c; margin-bottom: 0.5px;">🌐 sources</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.1; font-family: 'Courier New', monospace;">
+                            <strong>id</strong> UUID PK<br/>
+                            <strong>url</strong> VARCHAR(2000) UNIQUE<br/>
+                            <strong>domain</strong> VARCHAR(255)<br/>
+                            <strong>source_type</strong> ENUM('twitter','news','blog','reddit','instagram')<br/>
+                            <strong>reliability_score</strong> DECIMAL(3,2)<br/>
+                            <strong>tier</strong> INTEGER (1=high, 2=med, 3=low)<br/>
+                            <strong>crawl_frequency</strong> INTERVAL<br/>
+                            <strong>last_crawled_at</strong> TIMESTAMPTZ<br/>
+                            <strong>is_active</strong> BOOLEAN<br/>
+                            <strong>metadata</strong> JSONB<br/>
+                            <br/>
+                            <strong style="color: #e65100;">Indexes:</strong><br/>
+                            • PK: id<br/>
+                            • UNIQUE: url<br/>
+                            • (tier, last_crawled_at)<br/>
+                            • (is_active, tier)
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MongoDB Collections Section -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin: 2px 0;">
+                    <!-- Raw Content Collection -->
+                    <div style="background: #fce4ec; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #c2185b;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #880e4f; margin-bottom: 0.5px;">📄 raw_content (MongoDB)</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.1; font-family: 'Courier New', monospace;">
+                            <strong>_id</strong> ObjectId<br/>
+                            <strong>content_hash</strong> String (SHA256)<br/>
+                            <strong>source_id</strong> UUID<br/>
+                            <strong>url</strong> String<br/>
+                            <strong>html_content</strong> String (compressed)<br/>
+                            <strong>extracted_text</strong> String<br/>
+                            <strong>media_urls</strong> Array&lt;String&gt;<br/>
+                            <strong>crawled_at</strong> Date<br/>
+                            <strong>processed_at</strong> Date<br/>
+                            <strong>ttl_expires_at</strong> Date (30 days)<br/>
+                            <strong>metadata</strong> Object<br/>
+                            <br/>
+                            <strong style="color: #e65100;">Indexes:</strong><br/>
+                            • content_hash (unique, for deduplication)<br/>
+                            • (source_id, crawled_at)<br/>
+                            • ttl_expires_at (TTL index, auto-delete)<br/>
+                            <br/>
+                            <strong style="color: #9c27b0;">Size Estimate:</strong><br/>
+                            • 10M docs/month × 2KB avg = 20GB/month<br/>
+                            • 30-day retention = 20GB total (rolling)
+                        </div>
+                    </div>
+                    
+                    <!-- Enriched Content Collection -->
+                    <div style="background: #f1f8e9; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #689f38;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #33691e; margin-bottom: 0.5px;">✨ enriched_content (MongoDB)</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.1; font-family: 'Courier New', monospace;">
+                            <strong>_id</strong> ObjectId<br/>
+                            <strong>trend_id</strong> UUID (FK to PostgreSQL)<br/>
+                            <strong>source_id</strong> UUID<br/>
+                            <strong>title</strong> String<br/>
+                            <strong>summary</strong> String (AI-generated)<br/>
+                            <strong>entities</strong> Array&lt;Object&gt; (NER output)<br/>
+                            <strong>topics</strong> Array&lt;String&gt; (ML classification)<br/>
+                            <strong>sentiment</strong> Object {score, label}<br/>
+                            <strong>embedding</strong> Array&lt;Float&gt; (768-dim BERT)<br/>
+                            <strong>created_at</strong> Date<br/>
+                            <br/>
+                            <strong style="color: #e65100;">Indexes:</strong><br/>
+                            • trend_id (for joining with PostgreSQL)<br/>
+                            • (created_at, trend_id)<br/>
+                            • topics (multikey)<br/>
+                            <br/>
+                            <strong style="color: #9c27b0;">Vector Search:</strong><br/>
+                            • embedding (IVF index for similarity search)<br/>
+                            • Used for "similar trends" feature
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Key Design Decisions -->
+                <div style="background: #e1f5fe; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #0277bd; margin-top: 2px;">
+                    <div style="font-size: 0.32em; font-weight: 700; color: #01579b; margin-bottom: 0.5px;">🎯 Schema Design Rationale</div>
+                    <div style="font-size: 0.28em; color: #333; line-height: 1.1;">
+                        <strong>PostgreSQL for structured data:</strong> Trends, users, keywords - ACID transactions, strong consistency, complex queries with JOINs. RLS for multi-tenancy security. | 
+                        <strong>MongoDB for unstructured:</strong> Raw HTML, enriched content with variable schema. Flexible document model. TTL indexes for auto-cleanup. | 
+                        <strong>TimescaleDB for time-series:</strong> Trend scores over time. Automatic compression. Fast range queries on timestamp. | 
+                        <strong>Partitioning strategy:</strong> global_trends by year (archive old data). trend_time_series by week (TimescaleDB chunks). | 
+                        <strong>Index optimization:</strong> Composite indexes for query patterns. GIN for JSONB/arrays. Partial indexes on is_active=TRUE. | 
+                        <strong>Data retention:</strong> raw_content: 30 days (MongoDB TTL). trend_time_series: 2 years compressed. global_trends: archived to S3 after 2 years.
+                    </div>
+                </div>
+                
+                <!-- Sample Query Section -->
+                <div style="background: #fff9c4; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #f57f17; margin-top: 2px;">
+                    <div style="font-size: 0.32em; font-weight: 700; color: #f57f17; margin-bottom: 0.5px;">💻 Example Query: Get Top Trends for Tenant</div>
+                    <div style="font-size: 0.26em; color: #333; line-height: 1.15; font-family: 'Courier New', monospace;">
+                        <code>
+                        -- Set tenant context (enforces RLS)<br/>
+                        SET app.current_tenant_id = '550e8400-e29b-41d4-a716-446655440000';<br/>
+                        <br/>
+                        -- Get top 50 trends (global + custom) with time-series data<br/>
+                        WITH combined_trends AS (<br/>
+                        &nbsp;&nbsp;SELECT id, title, momentum_score, detected_at, 'global' as source FROM global_trends<br/>
+                        &nbsp;&nbsp;WHERE detected_at > NOW() - INTERVAL '7 days'<br/>
+                        &nbsp;&nbsp;UNION ALL<br/>
+                        &nbsp;&nbsp;SELECT id, title, momentum_score, detected_at, 'custom' as source FROM custom_trends<br/>
+                        &nbsp;&nbsp;-- RLS automatically filters by tenant_id<br/>
+                        )<br/>
+                        SELECT ct.*, ts.mentions_count, ts.sentiment_score<br/>
+                        FROM combined_trends ct<br/>
+                        LEFT JOIN LATERAL (<br/>
+                        &nbsp;&nbsp;SELECT mentions_count, sentiment_score<br/>
+                        &nbsp;&nbsp;FROM trend_time_series<br/>
+                        &nbsp;&nbsp;WHERE trend_id = ct.id AND timestamp > NOW() - INTERVAL '24 hours'<br/>
+                        &nbsp;&nbsp;ORDER BY timestamp DESC LIMIT 1<br/>
+                        ) ts ON true<br/>
+                        ORDER BY momentum_score DESC<br/>
+                        LIMIT 50;<br/>
+                        <br/>
+                        -- Uses indexes: (momentum_score DESC, detected_at DESC), (tenant_id, momentum_score DESC), (trend_id, timestamp DESC)
+                        </code>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 17: API Protocol Selection - REST vs gRPC vs GraphQL -->
+            <section>
+                <h1 style="font-size: 1.05em; margin-bottom: 2px;">API Protocol Selection: REST vs gRPC vs GraphQL</h1>
+                
+                <p style="font-size: 0.34em; color: #555; margin: 0 0 2px 0; line-height: 1.1; text-align: center;">
+                    <strong>Critical architectural decision: Which API protocol for which use case?</strong> 
+                    Each protocol has distinct strengths - the key is matching protocol characteristics to client needs and system constraints.
+                </p>
+                
+                <!-- Protocol Comparison Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin: 2px 0;">
+                    <!-- REST -->
+                    <div style="background: #e3f2fd; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #1565c0; margin-bottom: 0.5px;">🌐 REST (HTTP/JSON)</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            <strong>✅ Strengths:</strong><br/>
+                            • Universal compatibility (browsers, mobile, any language)<br/>
+                            • Human-readable (easy debugging with curl/Postman)<br/>
+                            • Cacheable (HTTP cache headers, CDN support)<br/>
+                            • Stateless (scales horizontally easily)<br/>
+                            • Mature ecosystem (tools, libraries, docs)<br/>
+                            • Firewall-friendly (port 443)<br/>
+                            <br/>
+                            <strong>❌ Weaknesses:</strong><br/>
+                            • Verbose payloads (JSON text encoding, ~30% overhead)<br/>
+                            • Over-fetching (GET /trends returns all fields even if you need only title)<br/>
+                            • Under-fetching (N+1 problem: multiple requests for related data)<br/>
+                            • Latency overhead (HTTP headers add ~500 bytes per request)<br/>
+                            • No built-in streaming (Server-Sent Events or WebSockets needed)<br/>
+                            <br/>
+                            <strong>🎯 Best For:</strong><br/>
+                            • Public APIs (partners, third-party integrations)<br/>
+                            • Web clients (browsers, React/Vue apps)<br/>
+                            • CRUD operations (create, read, update, delete)<br/>
+                            • Cacheable content (top trends, static data)<br/>
+                            <br/>
+                            <strong>📊 Performance:</strong><br/>
+                            • Latency: 50-100ms (with HTTP/2)<br/>
+                            • Throughput: 5K-10K req/sec per server<br/>
+                            • Payload size: 2-5KB typical response
+                        </div>
+                    </div>
+                    
+                    <!-- gRPC -->
+                    <div style="background: #e8f5e9; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #2e7d32; margin-bottom: 0.5px;">⚡ gRPC (HTTP/2 + Protobuf)</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            <strong>✅ Strengths:</strong><br/>
+                            • High performance (binary encoding, 4-10x faster than JSON)<br/>
+                            • Compact payloads (Protobuf ~60% smaller than JSON)<br/>
+                            • Built-in streaming (server/client/bidirectional)<br/>
+                            • Type-safe (code generation from .proto files)<br/>
+                            • HTTP/2 multiplexing (many requests on one connection)<br/>
+                            • Efficient for microservices (low latency service-to-service)<br/>
+                            <br/>
+                            <strong>❌ Weaknesses:</strong><br/>
+                            • Limited browser support (needs gRPC-Web proxy)<br/>
+                            • Not human-readable (binary format, hard to debug)<br/>
+                            • Steeper learning curve (Protobuf schema required)<br/>
+                            • Less cache-friendly (binary, no standard HTTP caching)<br/>
+                            • Firewall issues (some block HTTP/2)<br/>
+                            • Tooling less mature (vs REST)<br/>
+                            <br/>
+                            <strong>🎯 Best For:</strong><br/>
+                            • Internal microservices (crawler ↔ NLP service)<br/>
+                            • Real-time data streams (live trend updates)<br/>
+                            • High-throughput systems (10M+ requests/day)<br/>
+                            • Mobile apps (battery-efficient, low bandwidth)<br/>
+                            • Language-agnostic backends (type-safe contracts)<br/>
+                            <br/>
+                            <strong>📊 Performance:</strong><br/>
+                            • Latency: 10-30ms (with HTTP/2 multiplexing)<br/>
+                            • Throughput: 20K-50K req/sec per server<br/>
+                            • Payload size: 0.5-2KB (60% smaller than JSON)
+                        </div>
+                    </div>
+                    
+                    <!-- GraphQL -->
+                    <div style="background: #f3e5f5; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #6a1b9a; margin-bottom: 0.5px;">🔮 GraphQL (HTTP/JSON)</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            <strong>✅ Strengths:</strong><br/>
+                            • Flexible queries (client specifies exact fields needed)<br/>
+                            • Solves over/under-fetching (single request for nested data)<br/>
+                            • Strong typing (schema with introspection)<br/>
+                            • Excellent for complex UIs (dashboards with many data sources)<br/>
+                            • Real-time with subscriptions (WebSocket-based)<br/>
+                            • Self-documenting (schema as API documentation)<br/>
+                            <br/>
+                            <strong>❌ Weaknesses:</strong><br/>
+                            • Caching complexity (can't use HTTP caching easily)<br/>
+                            • Potential for expensive queries (unbounded depth/breadth)<br/>
+                            • Backend complexity (resolvers, N+1 query problem)<br/>
+                            • Steeper learning curve (query language)<br/>
+                            • Performance overhead (query parsing, execution planning)<br/>
+                            • File uploads cumbersome (needs multipart)<br/>
+                            <br/>
+                            <strong>🎯 Best For:</strong><br/>
+                            • Complex dashboards (trends + analytics + custom keywords)<br/>
+                            • Rapidly evolving UIs (frontend teams iterate fast)<br/>
+                            • Mobile apps with limited bandwidth (fetch only needed fields)<br/>
+                            • Public API where consumers have varied needs<br/>
+                            • When over/under-fetching is a real problem<br/>
+                            <br/>
+                            <strong>📊 Performance:</strong><br/>
+                            • Latency: 60-150ms (depends on resolver complexity)<br/>
+                            • Throughput: 3K-8K req/sec per server<br/>
+                            • Payload size: Variable (only requested fields)
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Our Decision for Mailchimp Trends Engine -->
+                <div style="background: #fff3e0; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #ff9800; margin-top: 2px;">
+                    <div style="font-size: 0.36em; font-weight: 700; color: #e65100; margin-bottom: 0.5px;">🎯 Our Multi-Protocol Strategy</div>
+                    <div style="font-size: 0.3em; color: #333; line-height: 1.2;">
+                        <strong>Primary Public API: REST</strong><br/>
+                        • Mailchimp integration uses REST (standard across their platform)<br/>
+                        • Third-party developers expect REST (familiar, well-documented)<br/>
+                        • Web dashboard uses REST (easy to debug, cacheable)<br/>
+                        • Example: <code style="background:#eee;padding:1px 3px;">GET /api/v1/trends?category=tech&limit=50</code><br/>
+                        <br/>
+                        <strong>Internal Microservices: gRPC</strong><br/>
+                        • Crawler → NLP Service: gRPC streaming (high-throughput, 10M posts/day)<br/>
+                        • NLP Service → Trend Aggregator: gRPC unary (low latency, type-safe)<br/>
+                        • Trend Engine → Notification Service: gRPC bidirectional streaming<br/>
+                        • 4x lower latency than REST for internal calls (10ms vs 40ms)<br/>
+                        <br/>
+                        <strong>Complex Dashboard Queries: GraphQL (Optional)</strong><br/>
+                        • Power users building custom dashboards<br/>
+                        • Example: Fetch trends + time-series + related keywords in one query<br/>
+                        • Reduces API calls from 5-10 REST calls to 1 GraphQL query<br/>
+                        • Implemented as a layer on top of REST (doesn't replace it)<br/>
+                        <br/>
+                        <strong>Real-Time Updates: WebSockets</strong><br/>
+                        • Live trend score updates pushed to dashboard<br/>
+                        • Protocol-agnostic (works with REST or GraphQL subscriptions)<br/>
+                        • Fallback to Server-Sent Events (SSE) for older browsers
+                    </div>
+                </div>
+                
+                <!-- Decision Matrix -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: 2px;">
+                    <!-- When to use each -->
+                    <div style="background: #e1f5fe; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #0277bd;">
+                        <div style="font-size: 0.34em; font-weight: 700; color: #01579b; margin-bottom: 0.5px;">📋 Decision Matrix: Which Protocol When?</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            <strong>Choose REST if:</strong><br/>
+                            • Building public API for external developers ✅<br/>
+                            • Clients are browsers or mobile apps (non-gRPC) ✅<br/>
+                            • Responses are cacheable (CDN, browser cache) ✅<br/>
+                            • Operations are simple CRUD ✅<br/>
+                            • Team familiarity with REST is high ✅<br/>
+                            <br/>
+                            <strong>Choose gRPC if:</strong><br/>
+                            • Internal service-to-service communication ✅<br/>
+                            • High throughput requirements (>10K req/sec) ✅<br/>
+                            • Need streaming (real-time data) ✅<br/>
+                            • Mobile clients with bandwidth constraints ✅<br/>
+                            • Type safety is critical (Protobuf schemas) ✅<br/>
+                            <br/>
+                            <strong>Choose GraphQL if:</strong><br/>
+                            • Complex nested queries (trends + time-series + keywords) ✅<br/>
+                            • Clients have diverse data needs ✅<br/>
+                            • Over/under-fetching is a real problem ✅<br/>
+                            • Rapid UI iteration (frontend changes frequently) ✅<br/>
+                            • Worth the backend complexity trade-off ✅
+                        </div>
+                    </div>
+                    
+                    <!-- Example endpoints -->
+                    <div style="background: #f1f8e9; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #689f38;">
+                        <div style="font-size: 0.34em; font-weight: 700; color: #33691e; margin-bottom: 0.5px;">💻 Example API Contracts</div>
+                        <div style="font-size: 0.26em; color: #333; line-height: 1.15; font-family: 'Courier New', monospace;">
+                            <strong>REST Endpoint:</strong><br/>
+                            GET /api/v1/trends?category=tech&limit=50<br/>
+                            Response: { trends: [...], pagination: {...} }<br/>
+                            <br/>
+                            <strong>gRPC Service (Protobuf):</strong><br/>
+                            service TrendService {<br/>
+                            &nbsp;&nbsp;rpc GetTrends(GetTrendsRequest)<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;returns (stream Trend);<br/>
+                            &nbsp;&nbsp;rpc StreamTrendUpdates(TrendFilter)<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;returns (stream TrendUpdate);<br/>
+                            }<br/>
+                            <br/>
+                            <strong>GraphQL Query:</strong><br/>
+                            query TrendDashboard {<br/>
+                            &nbsp;&nbsp;trends(category: "tech", limit: 50) {<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;id title momentumScore<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;timeSeries(last: 24) {<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp score<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;keywords { keyword matchType }<br/>
+                            &nbsp;&nbsp;}<br/>
+                            }<br/>
+                            <br/>
+                            <strong>Benefit:</strong> 1 GraphQL query = 3 REST calls<br/>
+                            (GET /trends, GET /time-series, GET /keywords)
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Common Pitfalls -->
+                <div style="background: #ffebee; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #e74c3c; margin-top: 2px;">
+                    <div style="font-size: 0.32em; font-weight: 700; color: #c62828; margin-bottom: 0.5px;">⚠️ Common Pitfalls & How We Avoid Them</div>
+                    <div style="font-size: 0.28em; color: #333; line-height: 1.1;">
+                        <strong>gRPC Pitfall: Debugging is Hard</strong> → Solution: Implement gRPC reflection, use grpcurl for testing, structured logging with request IDs | 
+                        <strong>GraphQL Pitfall: N+1 Query Problem</strong> → Solution: DataLoader for batching, query complexity limits (max depth 5), resolver caching | 
+                        <strong>REST Pitfall: API Versioning</strong> → Solution: URL-based versioning (v1, v2), maintain backward compatibility for 1 year, sunset policy | 
+                        <strong>gRPC Pitfall: Browser Support</strong> → Solution: gRPC-Web proxy (Envoy) for browser clients, fallback to REST for unsupported clients | 
+                        <strong>GraphQL Pitfall: Expensive Queries</strong> → Solution: Query cost analysis, rate limiting based on query complexity, timeout after 10 seconds
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 18: User Interface Design -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">API Architecture & Endpoints</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>Multi-protocol API design for flexibility and performance.</strong> 
+                    RESTful for CRUD operations. GraphQL for complex queries. WebSocket for real-time. 
+                    OAuth 2.0 + API keys. Rate limiting per tenant. Comprehensive SDK support.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- REST API -->
+                    <div style="background: #e3f2fd; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #2196F3;">
+                        <div style="font-size: 0.38em; font-weight: 700; color: #1565c0; margin-bottom: 2px;">🌐 REST API</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.2;">
+                            <strong>Key Endpoints:</strong><br/>
+                            • GET /api/v1/trends - List trends (paginated)<br/>
+                            • GET /api/v1/trends/:id - Trend details<br/>
+                            • POST /api/v1/trends/search - Search trends<br/>
+                            • GET /api/v1/custom-trends - Tenant trends<br/>
+                            • POST /api/v1/keywords - Add custom keywords<br/>
+                            • GET /api/v1/analytics - Trend analytics<br/>
+                            <strong>Use Cases:</strong> Standard CRUD, mobile apps, third-party integrations<br/>
+                            <strong>Rate Limit:</strong> 1000 req/hour (Basic), 5000 req/hour (Pro)<br/>
+                            <strong>Response Format:</strong> JSON, paginated (100 items/page)
+                        </div>
+                    </div>
+                    
+                    <!-- GraphQL API -->
+                    <div style="background: #f3e5f5; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #9c27b0;">
+                        <div style="font-size: 0.38em; font-weight: 700; color: #6a1b9a; margin-bottom: 2px;">⚡ GraphQL API</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.2;">
+                            <strong>Endpoint:</strong> POST /graphql<br/>
+                            <strong>Key Queries:</strong><br/>
+                            • trends(filters, sort, limit) - Flexible trend queries<br/>
+                            • customTrends(tenantId) - Tenant-specific trends<br/>
+                            • trendDetails(id, include: [stats, sources, related])<br/>
+                            • search(query, semantic: true) - Natural language<br/>
+                            <strong>Key Mutations:</strong><br/>
+                            • addKeyword(keyword, type, config)<br/>
+                            • createAlert(conditions, channels)<br/>
+                            <strong>Use Cases:</strong> Complex queries, fetch exactly what you need, reduce over-fetching<br/>
+                            <strong>Rate Limit:</strong> 500 queries/hour, complexity scoring
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- WebSocket API -->
+                    <div style="background: #e8f5e9; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #4caf50;">
+                        <div style="font-size: 0.38em; font-weight: 700; color: #2e7d32; margin-bottom: 2px;">🔄 WebSocket API</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.2;">
+                            <strong>Endpoint:</strong> wss://api.trends.com/ws<br/>
+                            <strong>Events (Server → Client):</strong><br/>
+                            • trend.new - New trend detected<br/>
+                            • trend.update - Momentum score changed<br/>
+                            • alert.triggered - Custom alert fired<br/>
+                            • keyword.matched - Custom keyword matched<br/>
+                            <strong>Commands (Client → Server):</strong><br/>
+                            • subscribe(trendId) - Watch specific trend<br/>
+                            • unsubscribe(trendId) - Stop watching<br/>
+                            <strong>Use Cases:</strong> Real-time dashboards, live alerts, collaborative features<br/>
+                            <strong>Connection Limit:</strong> 5 concurrent per tenant
+                        </div>
+                    </div>
+                    
+                    <!-- Webhooks -->
+                    <div style="background: #fff3e0; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #ff9800;">
+                        <div style="font-size: 0.38em; font-weight: 700; color: #e65100; margin-bottom: 2px;">🔔 Webhooks</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.2;">
+                            <strong>Configuration:</strong> POST /api/v1/webhooks<br/>
+                            <strong>Events:</strong><br/>
+                            • trend.momentum.spike - Score increased >20 pts<br/>
+                            • custom.keyword.match - Your keyword matched<br/>
+                            • alert.condition.met - Alert triggered<br/>
+                            • trend.sentiment.shift - Sentiment changed<br/>
+                            <strong>Payload:</strong> JSON with event data + timestamp<br/>
+                            <strong>Security:</strong> HMAC-SHA256 signature verification<br/>
+                            <strong>Retry:</strong> 3 attempts (exponential backoff)<br/>
+                            <strong>Use Cases:</strong> Slack notifications, CI/CD triggers, custom workflows
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Authentication -->
+                    <div style="background: #ffebee; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #e74c3c;">
+                        <div style="font-size: 0.38em; font-weight: 700; color: #c62828; margin-bottom: 2px;">🔐 Authentication & Security</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.2;">
+                            <strong>Methods:</strong><br/>
+                            • API Keys (header: X-API-Key) - Simple, server-to-server<br/>
+                            • OAuth 2.0 (Authorization Code) - User-facing apps<br/>
+                            • JWT Tokens (Bearer) - Short-lived, refresh tokens<br/>
+                            <strong>Scopes:</strong> trends:read, trends:write, custom:manage, alerts:manage<br/>
+                            <strong>Encryption:</strong> TLS 1.3, at-rest AES-256<br/>
+                            <strong>IP Whitelisting:</strong> Optional per tenant
+                        </div>
+                    </div>
+                    
+                    <!-- SDKs & Documentation -->
+                    <div style="background: #e0f2f1; padding: 3px 6px; border-radius: 3px; border-left: 3px solid #009688;">
+                        <div style="font-size: 0.38em; font-weight: 700; color: #00695c; margin-bottom: 2px;">📚 SDKs & Documentation</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.2;">
+                            <strong>Official SDKs:</strong><br/>
+                            • Python (pip install trends-sdk)<br/>
+                            • JavaScript/Node.js (npm install @trends/sdk)<br/>
+                            • Ruby (gem install trends-client)<br/>
+                            <strong>Documentation:</strong> OpenAPI 3.0 spec, interactive docs (Swagger UI), GraphQL Playground<br/>
+                            <strong>Examples:</strong> Code samples for all languages, Postman collections, cURL commands<br/>
+                            <strong>Support:</strong> API status page, changelog, migration guides
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 18: User Interface Design -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">User Interface Design</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>Intuitive, responsive dashboard with natural language search.</strong> 
+                    Customizable widgets, drag-and-drop layout, seamless Mailchimp integration. 
+                    Mobile-first design. Real-time updates via WebSocket.
+                </p>
+                
+                <!-- Dashboard Layout Mockup -->
+                <div style="border: 2px solid #2c3e50; border-radius: 4px; padding: 3px; margin: 3px 0; background: #f8f9fa;">
+                    <!-- Header -->
+                    <div style="background: #2c3e50; color: white; padding: 3px 6px; border-radius: 3px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-size: 0.32em; font-weight: 700;">🔍 Search: "AI marketing trends last week"</div>
+                        <div style="font-size: 0.3em;">Filters | Custom Tracking | Profile</div>
+                    </div>
+                    
+                    <!-- Main Layout -->
+                    <div style="display: grid; grid-template-columns: 180px 1fr; gap: 3px;">
+                        <!-- Sidebar -->
+                        <div style="background: #e3f2fd; padding: 3px 5px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                            <div style="font-size: 0.3em; font-weight: 700; color: #1565c0; margin-bottom: 2px;">Navigation</div>
+                            <div style="font-size: 0.28em; color: #333; line-height: 1.3;">
+                                📊 Dashboard<br/>
+                                🔥 Trending Now<br/>
+                                🎯 Custom Trends<br/>
+                                🔔 Alerts<br/>
+                                📈 Analytics<br/>
+                                ⚙️ Settings
+                            </div>
+                        </div>
+                        
+                        <!-- Main Content Area -->
+                        <div style="background: white; padding: 3px; border-radius: 3px; border: 1px solid #ddd;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;">
+                                <!-- Trend Card 1 -->
+                                <div style="background: #e8f5e9; padding: 3px 5px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                                    <div style="font-size: 0.3em; font-weight: 700; color: #2e7d32;">AI Marketing</div>
+                                    <div style="font-size: 0.26em; color: #333; line-height: 1.2;">
+                                        Score: 87<br/>
+                                        Growth: +23%<br/>
+                                        Sources: 342
+                                    </div>
+                                </div>
+                                
+                                <!-- Trend Card 2 -->
+                                <div style="background: #fff3e0; padding: 3px 5px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                                    <div style="font-size: 0.3em; font-weight: 700; color: #e65100;">Video Content</div>
+                                    <div style="font-size: 0.26em; color: #333; line-height: 1.2;">
+                                        Score: 82<br/>
+                                        Growth: +18%<br/>
+                                        Sources: 287
+                                    </div>
+                                </div>
+                                
+                                <!-- Trend Card 3 -->
+                                <div style="background: #f3e5f5; padding: 3px 5px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                                    <div style="font-size: 0.3em; font-weight: 700; color: #6a1b9a;">Sustainability</div>
+                                    <div style="font-size: 0.26em; color: #333; line-height: 1.2;">
+                                        Score: 79<br/>
+                                        Growth: +15%<br/>
+                                        Sources: 219
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Chart Area -->
+                            <div style="background: #eceff1; padding: 3px 5px; border-radius: 3px; margin-top: 3px; text-align: center;">
+                                <div style="font-size: 0.28em; color: #555;">📈 Trend Momentum Chart (7-day view)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Component Gallery -->
+                <div style="font-size: 0.34em; font-weight: 700; color: #2c3e50; margin: 3px 0 2px 0; text-align: center;">Key UI Components</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin: 2px 0;">
+                    <div style="background: #e3f2fd; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #1565c0; margin-bottom: 1px;">🔍 Natural Language Search</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            Type queries like "sustainability trends Europe". NLP parses intent. Semantic search. Auto-suggestions. Saved searches.
+                        </div>
+                    </div>
+                    
+                    <div style="background: #e8f5e9; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #2e7d32; margin-bottom: 1px;">📊 Interactive Charts</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            Line graphs (momentum over time). Heatmaps (geographic). Bar charts (source breakdown). D3.js powered. Exportable.
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fff3e0; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #e65100; margin-bottom: 1px;">🎯 Custom Tracking Panel</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            Add keywords (exact/phrase/regex). Custom sources (RSS, sites). Alert thresholds. Priority levels. Match history.
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f3e5f5; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #6a1b9a; margin-bottom: 1px;">📧 Mailchimp Integration</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            Embedded widgets. Campaign editor side panel. One-click insert trends. Subject line suggestions. Content blocks.
+                        </div>
+                    </div>
+                    
+                    <div style="background: #ffebee; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #e74c3c;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #c62828; margin-bottom: 1px;">🔔 Smart Alerts</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            Momentum spike detection. Custom keyword triggers. Sentiment shifts. Email/SMS/Slack notifications. Configurable thresholds.
+                        </div>
+                    </div>
+                    
+                    <div style="background: #e0f2f1; padding: 2px 4px; border-radius: 3px; border-left: 2px solid #009688;">
+                        <div style="font-size: 0.32em; font-weight: 700; color: #00695c; margin-bottom: 1px;">⚡ Real-Time Updates</div>
+                        <div style="font-size: 0.28em; color: #333; line-height: 1.15;">
+                            WebSocket connections. Live trend score updates. New trend notifications. Collaborative features. No page refresh needed.
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 19: Failure Scenarios & Disaster Recovery -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">Failure Scenarios & Recovery Strategies</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>Production systems must handle failures gracefully.</strong> 
+                    Identifying failure modes, implementing recovery mechanisms, and ensuring system resilience with minimal data loss and downtime.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Crawler Failures -->
+                    <div style="background: #e3f2fd; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #1565c0; margin-bottom: 1px;">🕷️ Crawler & Ingestion Failures</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Rate Limiting / IP Blocks:</strong><br/>
+                            • Detection: Monitor 429/403 HTTP status codes, sudden drop in success rate<br/>
+                            • Recovery: Exponential backoff (1min → 5min → 15min). Rotate IP addresses (proxy pool). Respect robots.txt. User-agent rotation<br/>
+                            • Prevention: Maintain politeness delay (1-5 sec between requests per domain). Distributed crawlers across IPs<br/><br/>
+                            <strong>Source Downtime / Content Changes:</strong><br/>
+                            • Detection: Connection timeouts, 5xx errors, HTML structure changes breaking parsers<br/>
+                            • Recovery: Dead letter queue for failed crawls. Retry with exponential backoff (3 attempts). Alert ops after 3 failures<br/>
+                            • Graceful degradation: Continue with other sources, mark source as "degraded"<br/><br/>
+                            <strong>Kafka Message Loss:</strong><br/>
+                            • Prevention: Replication factor 3, min.insync.replicas=2, acks=all for producers<br/>
+                            • Detection: Monitor lag, partition leadership changes<br/>
+                            • Recovery: Consumer offset management, idempotent processing (dedupe based on content hash)
+                        </div>
+                    </div>
+                    
+                    <!-- Processing Pipeline Failures -->
+                    <div style="background: #e8f5e9; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #2e7d32; margin-bottom: 1px;">⚙️ Processing Pipeline Failures</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Worker Node Crashes:</strong><br/>
+                            • Detection: Health check failures, unacknowledged messages in queue<br/>
+                            • Recovery: Kubernetes auto-restart failed pods. Messages requeued after visibility timeout (5 min)<br/>
+                            • Prevention: Stateless workers, checkpointing progress every 100 messages<br/><br/>
+                            <strong>NLP/ML Model Errors:</strong><br/>
+                            • Detection: Exception rate spike, increased latency (P99 > 2 sec)<br/>
+                            • Recovery: Circuit breaker pattern - fallback to simpler model or rule-based scoring after 5 consecutive failures<br/>
+                            • Graceful degradation: Skip optional enrichment (sentiment, entities) but continue basic processing<br/><br/>
+                            <strong>Backpressure / Queue Overflow:</strong><br/>
+                            • Detection: Kafka lag > 1 hour, memory pressure alerts<br/>
+                            • Recovery: Auto-scale workers (Kubernetes HPA based on queue depth). Throttle ingestion if processing can't keep up<br/>
+                            • Prevention: Set max queue size, alert at 70% capacity
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Database & Storage Failures -->
+                    <div style="background: #fff3e0; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #e65100; margin-bottom: 1px;">💾 Database & Storage Failures</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>PostgreSQL Primary Failure:</strong><br/>
+                            • Detection: Connection failures, replication lag spike<br/>
+                            • Recovery: Auto-failover to standby replica (30-60 sec RTO using AWS RDS Multi-AZ). Promote read replica to primary<br/>
+                            • Data loss: RPO < 1 sec (synchronous replication to standby)<br/><br/>
+                            <strong>Redis Cache Eviction / Failure:</strong><br/>
+                            • Detection: Cache miss rate spike, increased DB load<br/>
+                            • Recovery: Fallback to database (slower but functional). Redis auto-restart, warm cache from DB<br/>
+                            • Prevention: Persistent Redis (AOF/RDB), read replicas for high availability<br/><br/>
+                            <strong>Elasticsearch Node Failure:</strong><br/>
+                            • Detection: Cluster health red/yellow, shard allocation issues<br/>
+                            • Recovery: Auto-rebalance shards to healthy nodes. Replica shards ensure no data loss<br/>
+                            • Prevention: Minimum 3 master nodes, shard replicas across nodes/AZs<br/><br/>
+                            <strong>S3 Data Corruption:</strong><br/>
+                            • Detection: Checksum validation failures, S3 object versioning<br/>
+                            • Recovery: Retrieve previous version. Recrawl content from source if needed<br/>
+                            • Prevention: S3 versioning enabled, cross-region replication for critical data
+                        </div>
+                    </div>
+                    
+                    <!-- Regional & Infrastructure Failures -->
+                    <div style="background: #f3e5f5; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #6a1b9a; margin-bottom: 1px;">🌍 Regional & Infrastructure Failures</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Availability Zone Failure:</strong><br/>
+                            • Architecture: Multi-AZ deployment for all critical services. Load balancers distribute across AZs<br/>
+                            • Recovery: Auto-drain connections from failed AZ, route traffic to healthy AZs (automatic in 30-60 sec)<br/>
+                            • Impact: Reduced capacity but service continues. Auto-scale in remaining AZs<br/><br/>
+                            <strong>Complete Region Failure (Disaster):</strong><br/>
+                            • Architecture: Active-passive multi-region (primary: us-east-1, DR: us-west-2)<br/>
+                            • Recovery: DNS failover to DR region (5-10 min manual process). Data lag: max 15 min (continuous replication)<br/>
+                            • RPO: 15 minutes | RTO: 30 minutes<br/>
+                            • Prevention: Regular DR drills (quarterly), automated failover testing<br/><br/>
+                            <strong>Network Partition:</strong><br/>
+                            • Detection: Inter-service communication failures, timeout spikes<br/>
+                            • Recovery: Retry with exponential backoff. Circuit breaker to prevent cascade failures<br/>
+                            • Graceful degradation: Return stale cached data with warning, disable write operations if partition detected
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #ffebee; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #e74c3c; margin-top: 3px;">
+                    <div style="font-size: 0.34em; font-weight: 700; color: #c62828; margin-bottom: 1px;">🎯 Resilience Summary</div>
+                    <div style="font-size: 0.3em; color: #333; line-height: 1.1;">
+                        <strong>Availability Target:</strong> 99.9% (8.76 hours downtime/year) | 
+                        <strong>Recovery Time Objective (RTO):</strong> 30 minutes for regional failure, < 1 min for component failures | 
+                        <strong>Recovery Point Objective (RPO):</strong> 15 minutes max data loss | 
+                        <strong>Testing:</strong> Chaos engineering monthly, DR drills quarterly | 
+                        <strong>Runbooks:</strong> Documented procedures for all failure scenarios
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 20: Security, Monitoring & Compliance -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">Security, Monitoring & Compliance</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>Enterprise-grade security with comprehensive monitoring and compliance.</strong> 
+                    End-to-end encryption, multi-tenant isolation, role-based access control. 
+                    Real-time monitoring, audit logging, GDPR/SOC 2/CCPA compliant.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Data Security -->
+                    <div style="background: #e3f2fd; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #1565c0; margin-bottom: 1px;">🔒 Data Security</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Encryption in Transit:</strong> HTTPS/TLS 1.3 for all API communications. Certificate pinning for mobile apps. Perfect forward secrecy enabled.<br/>
+                            <strong>Encryption at Rest:</strong> AES-256 encryption for S3 (videos/images), PostgreSQL (RDS), MongoDB, Elasticsearch. AWS KMS for key management.<br/>
+                            <strong>Multi-Tenant Isolation:</strong> PostgreSQL Row-Level Security (RLS) on custom_trends, tenant_keywords. Database-level tenant_id validation. Redis namespace isolation per tenant.<br/>
+                            <strong>Data Retention:</strong> Configurable per tenant (30/60/90 days). Automated deletion after retention period. Soft delete with 30-day grace period before permanent removal.
+                        </div>
+                    </div>
+                    
+                    <!-- Authentication & Authorization -->
+                    <div style="background: #e8f5e9; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #2e7d32; margin-bottom: 1px;">👤 Authentication & Authorization</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Authentication Methods:</strong> OAuth 2.0 (Authorization Code flow), API Keys (X-API-Key header), JWT tokens (Bearer). Token expiry: access (1h), refresh (30d).<br/>
+                            <strong>Multi-Factor Authentication:</strong> Required for admin accounts. SMS, authenticator app (TOTP), email verification. Recovery codes provided.<br/>
+                            <strong>Role-Based Access Control (RBAC):</strong> Admin, Manager, Analyst, Viewer roles. Granular permissions: trends:read, trends:write, custom:manage, alerts:manage. Tenant-level role assignment.<br/>
+                            <strong>Session Management:</strong> 15-min idle timeout. Session rotation on privilege escalation. Concurrent session limits (5 per user). Force logout capability.
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- API Security -->
+                    <div style="background: #fff3e0; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #e65100; margin-bottom: 1px;">🛡️ API Security</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Rate Limiting:</strong> Per tenant (1000-5000 req/hour based on plan). Per IP (100 req/min). Redis-based sliding window. 429 status with Retry-After header.<br/>
+                            <strong>CORS Policies:</strong> Whitelist allowed origins per tenant. Preflight request handling. Credentials only for same-origin.<br/>
+                            <strong>CSRF Protection:</strong> Double-submit cookie pattern. SameSite=Strict cookies. Origin header validation.<br/>
+                            <strong>Input Validation:</strong> Schema validation (JSON Schema). Max payload size (10MB). Parameterized queries (SQL injection prevention). HTML sanitization (XSS prevention). Content Security Policy headers.
+                        </div>
+                    </div>
+                    
+                    <!-- Monitoring & Compliance -->
+                    <div style="background: #f3e5f5; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #6a1b9a; margin-bottom: 1px;">📊 Monitoring & Compliance</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Audit Logging:</strong> All API calls logged (who, what, when, from where). Data access logs. Admin action logs. Immutable logs (append-only). 2-year retention.<br/>
+                            <strong>Real-Time Monitoring:</strong> Prometheus + Grafana dashboards. Error rate, latency, throughput metrics. Alerting via PagerDuty/Slack. Custom security alerts (failed auth attempts, unusual data access).<br/>
+                            <strong>Compliance:</strong> GDPR compliant (data portability, right to deletion, consent management). SOC 2 Type II certified. CCPA compliant (California privacy). Data residency options (EU/US regions).<br/>
+                            <strong>Incident Response:</strong> 24/7 on-call rotation. Incident runbooks. Post-mortem process. Security disclosure policy. 24h notification for data breaches.
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #ffebee; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #e74c3c; margin-top: 3px;">
+                    <div style="font-size: 0.34em; font-weight: 700; color: #c62828; margin-bottom: 1px;">🎯 Security Posture Summary</div>
+                    <div style="font-size: 0.3em; color: #333; line-height: 1.1;">
+                        <strong>Zero Trust Architecture:</strong> No implicit trust, verify every request | 
+                        <strong>Least Privilege:</strong> Minimal permissions by default | 
+                        <strong>Defense in Depth:</strong> Multiple security layers | 
+                        <strong>Security by Design:</strong> Built-in from architecture phase | 
+                        <strong>Continuous Monitoring:</strong> Real-time threat detection
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Slide 21: Future Enhancements & Evolution -->
+            <section>
+                <h1 style="font-size: 1.1em; margin-bottom: 2px;">System Evolution & Future Enhancements</h1>
+                
+                <p style="font-size: 0.36em; color: #555; margin: 0 0 3px 0; line-height: 1.1; text-align: center;">
+                    <strong>System design is iterative - plan for future growth.</strong> 
+                    Phased rollout reduces risk, allows learning from production data, and enables incremental value delivery to users.
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Phase 1: MVP -->
+                    <div style="background: #e3f2fd; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #2196F3;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #1565c0; margin-bottom: 1px;">🚀 Phase 1: MVP (3-4 months)</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Core Features:</strong><br/>
+                            • Basic web crawling (top 10K sources)<br/>
+                            • Simple keyword extraction (TF-IDF)<br/>
+                            • Rule-based trend scoring (engagement metrics)<br/>
+                            • REST API for trend queries<br/>
+                            • Basic dashboard (top 50 trends)<br/>
+                            • Single-region deployment (us-east-1)<br/><br/>
+                            <strong>Tech Stack:</strong><br/>
+                            • Python scrapy for crawling<br/>
+                            • PostgreSQL + Redis<br/>
+                            • Flask API on EC2<br/>
+                            • Batch processing (daily)<br/><br/>
+                            <strong>Goals:</strong><br/>
+                            • Validate concept<br/>
+                            • Gather user feedback<br/>
+                            • Baseline metrics<br/>
+                            • Cost: ~$5K/month
+                        </div>
+                    </div>
+                    
+                    <!-- Phase 2: ML & Scale -->
+                    <div style="background: #e8f5e9; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #4caf50;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #2e7d32; margin-bottom: 1px;">🤖 Phase 2: ML-Powered (6-8 months)</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Enhanced Features:</strong><br/>
+                            • Expand to 500K sources<br/>
+                            • NLP pipeline (BERT for topics)<br/>
+                            • Sentiment analysis<br/>
+                            • Entity extraction (brands, products)<br/>
+                            • Trend categorization (ML classifier)<br/>
+                            • Hourly updates for top sources<br/>
+                            • Enhanced dashboard (filters, search)<br/>
+                            • Custom trend monitoring<br/><br/>
+                            <strong>Tech Upgrades:</strong><br/>
+                            • Kafka for streaming<br/>
+                            • Airflow for orchestration<br/>
+                            • ML inference service (GPUs)<br/>
+                            • Elasticsearch for search<br/><br/>
+                            <strong>Goals:</strong><br/>
+                            • Improve accuracy (85%+ precision)<br/>
+                            • Reduce latency (1-hour freshness)<br/>
+                            • Cost: ~$12K/month
+                        </div>
+                    </div>
+                    
+                    <!-- Phase 3: Real-time & Personalization -->
+                    <div style="background: #fff3e0; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #ff9800;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #e65100; margin-bottom: 1px;">⚡ Phase 3: Real-Time Intelligence (12+ months)</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Advanced Features:</strong><br/>
+                            • Full 1.8M sources coverage<br/>
+                            • Real-time trending (sub-minute)<br/>
+                            • Personalized recommendations<br/>
+                            • Trend forecasting (predict next week)<br/>
+                            • Anomaly detection (viral spikes)<br/>
+                            • A/B testing insights<br/>
+                            • Competitive intelligence<br/>
+                            • Auto-generated campaign suggestions<br/><br/>
+                            <strong>Tech Upgrades:</strong><br/>
+                            • Flink for complex event processing<br/>
+                            • Graph database (trend relationships)<br/>
+                            • Advanced ML (LLMs for content gen)<br/>
+                            • Multi-region (us-west-2, eu-west-1)<br/><br/>
+                            <strong>Goals:</strong><br/>
+                            • Production-grade reliability<br/>
+                            • Deep Mailchimp integration<br/>
+                            • Cost: ~$25K/month
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 3px 0;">
+                    <!-- Long-term Vision -->
+                    <div style="background: #f3e5f5; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #9c27b0;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #6a1b9a; margin-bottom: 1px;">🔮 Phase 4: Long-Term Vision (18-24 months)</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Moonshot Features:</strong><br/>
+                            • AI-powered campaign generation: From trend to full campaign draft (subject line, body, images) in one click<br/>
+                            • Predictive trend discovery: Identify trends before they peak using early signals and historical patterns<br/>
+                            • Industry-specific models: Custom ML models for e-commerce, SaaS, nonprofits, etc.<br/>
+                            • Automated A/B testing: System suggests variants and auto-optimizes based on engagement<br/>
+                            • Multi-channel integration: Expand beyond email to social media, SMS, push notifications<br/>
+                            • Trend marketplace: Users share custom trends, buy/sell trend intelligence<br/>
+                            • White-label offering: License platform to other marketing tools
+                        </div>
+                    </div>
+                    
+                    <!-- Technical Debt & Improvements -->
+                    <div style="background: #ffebee; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #e74c3c;">
+                        <div style="font-size: 0.36em; font-weight: 700; color: #c62828; margin-bottom: 1px;">🔧 Continuous Improvements</div>
+                        <div style="font-size: 0.3em; color: #333; line-height: 1.15;">
+                            <strong>Technical Debt Management:</strong><br/>
+                            • Refactor crawlers to use modern async framework (Playwright) as traffic grows<br/>
+                            • Migrate from PostgreSQL to distributed DB (CockroachDB/Vitess) for global scale<br/>
+                            • Rewrite hot paths in Go/Rust for better performance<br/>
+                            • Implement GraphQL for more flexible API queries<br/><br/>
+                            <strong>Performance Optimizations:</strong><br/>
+                            • Content deduplication (avoid processing same article multiple times)<br/>
+                            • Incremental crawling (only fetch changed content using ETags)<br/>
+                            • Smart caching (predict which trends users will query)<br/>
+                            • Edge computing (process data closer to sources)<br/><br/>
+                            <strong>Operational Excellence:</strong><br/>
+                            • Automated canary deployments<br/>
+                            • Chaos engineering tests<br/>
+                            • ML model performance monitoring<br/>
+                            • Cost optimization (reserved instances, spot fleets)
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #e1f5fe; padding: 2px 5px; border-radius: 3px; border-left: 2px solid #0288d1; margin-top: 3px;">
+                    <div style="font-size: 0.34em; font-weight: 700; color: #01579b; margin-bottom: 1px;">🎯 Key Evolution Principles</div>
+                    <div style="font-size: 0.3em; color: #333; line-height: 1.1;">
+                        <strong>Start Small:</strong> MVP validates concept before heavy investment | 
+                        <strong>Iterate Based on Data:</strong> Let user behavior guide roadmap priorities | 
+                        <strong>Modular Architecture:</strong> Swap components without full rewrite | 
+                        <strong>Measure Everything:</strong> Track accuracy, latency, cost, user engagement | 
+                        <strong>Balance Innovation & Stability:</strong> New features shouldn't break existing functionality
+                    </div>
+                </div>
+            </section>
+            
+        </div>
+    </div>
+    
+    <!-- Navigation hint -->
+    <div class="nav-hint">
+        Use arrow keys or click to navigate →
+    </div>
+    
+    <!-- Reveal.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    
+    <script>
+        // Initialize Mermaid before Reveal.js
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 20,
+                nodeSpacing: 80,
+                rankSpacing: 100
+            },
+            themeVariables: {
+                fontSize: '16px',
+                fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+            }
+        });
+        
+        // Initialize Reveal.js
+        Reveal.initialize({
+            // Display controls
+            controls: true,
+            
+            // Display a presentation progress bar
+            progress: true,
+            
+            // Display the page number of the current slide
+            slideNumber: 'c/t',
+            
+            // Add the current slide number to the URL hash
+            hash: true,
+            
+            // Push each slide change to the browser history
+            history: true,
+            
+            // Enable keyboard shortcuts for navigation
+            keyboard: true,
+            
+            // Enable the slide overview mode
+            overview: true,
+            
+            // Vertical centering of slides
+            center: true,
+            
+            // Enables touch navigation on devices with touch input
+            touch: true,
+            
+            // Loop the presentation
+            loop: false,
+            
+            // Change the presentation direction to be RTL
+            rtl: false,
+            
+            // Transition style
+            transition: 'slide', // none/fade/slide/convex/concave/zoom
+            
+            // Transition speed
+            transitionSpeed: 'default', // default/fast/slow
+            
+            // Transition style for full page slide backgrounds
+            backgroundTransition: 'fade', // none/fade/slide/convex/concave/zoom
+            
+            // Number of slides away from the current that are visible
+            viewDistance: 3,
+            
+            // Slide dimensions
+            width: 1280,
+            height: 720,
+            margin: 0.02,
+            
+            // Bounds for smallest/largest possible scale to apply to content
+            minScale: 0.2,
+            maxScale: 2.0,
+            
+            // PDF printing
+            pdfSeparateFragments: false,
+            pdfMaxPagesPerSlide: 1
+        });
+        
+        // Add custom keyboard shortcuts
+        Reveal.addKeyBinding({ keyCode: 72, key: 'H', description: 'Go to first slide' }, () => {
+            Reveal.slide(0);
+        });
+        
+        // Log slide changes (optional, for debugging)
+        Reveal.on('slidechanged', event => {
+            console.log('Slide changed to:', event.indexh);
+        });
+    </script>
+</body>
+</html>
+
